@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS messages (
-  id serial PRIMARY KEY,
+  id bigserial PRIMARY KEY,
   raw text,
   created_at timestamp
 );
