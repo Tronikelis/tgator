@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/sqlc-2.0.json",
   "version": "2",
   "sql": [
     {

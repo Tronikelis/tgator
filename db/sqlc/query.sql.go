@@ -7,7 +7,22 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createMessage = `-- name: CreateMessage :exec
+INSERT INTO messages (
+  id, raw, created_at
+) VALUES (
+  DEFAULT, $1, NOW()
+)
+`
+
+func (q *Queries) CreateMessage(ctx context.Context, raw pgtype.Text) error {
+	_, err := q.db.Exec(ctx, createMessage, raw)
+	return err
+}
 
 const getMessage = `-- name: GetMessage :one
 SELECT id, raw, created_at FROM messages WHERE id = $1 LIMIT 1
