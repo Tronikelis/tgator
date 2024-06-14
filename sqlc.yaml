@@ -1,0 +1,6 @@
+version: "2"
+
+sql:
+   - engine: postgresql
+     queries: ./db/queries/query.sql
+     schema: ./db/schema.sql
