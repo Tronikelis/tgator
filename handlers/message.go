@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"tgator/binds"
 	"tgator/middleware"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -10,9 +11,18 @@ import (
 func CreateMessage(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
+	messageBind := binds.MessageBind{}
+	if err := cc.Bind(&messageBind); err != nil {
+		return echo.ErrBadRequest
+	}
+
+	if messageBind.Raw == "" {
+		return echo.ErrBadRequest
+	}
+
 	cc.Queries.CreateMessage(
 		cc.Request().Context(),
-		pgtype.Text{String: "wat'supz", Valid: true},
+		pgtype.Text{String: messageBind.Raw, Valid: true},
 	)
 
 	return nil
