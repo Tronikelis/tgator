@@ -1,28 +1,31 @@
 package handlers
 
 import (
-	"tgator/binds"
 	"tgator/middleware"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
+type CreateMessageBind struct {
+	Raw string `json:"raw"`
+}
+
 func CreateMessage(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
-	messageBind := binds.MessageBind{}
-	if err := cc.Bind(&messageBind); err != nil {
+	bind := CreateMessageBind{}
+	if err := cc.Bind(&bind); err != nil {
 		return echo.ErrBadRequest
 	}
 
-	if messageBind.Raw == "" {
+	if bind.Raw == "" {
 		return echo.ErrBadRequest
 	}
 
 	cc.Queries.CreateMessage(
 		cc.Request().Context(),
-		pgtype.Text{String: messageBind.Raw, Valid: true},
+		pgtype.Text{String: bind.Raw, Valid: true},
 	)
 
 	return nil
