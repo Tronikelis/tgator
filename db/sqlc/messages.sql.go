@@ -14,15 +14,21 @@ import (
 const createMessage = `-- name: CreateMessage :exec
 INSERT INTO messages (
     id, 
+    created_at,
     raw,
-    created_at
+    raw_jsonb
 ) VALUES (
-    DEFAULT, $1, NOW()
+    DEFAULT, NOW(), $1, $2
 )
 `
 
-func (q *Queries) CreateMessage(ctx context.Context, raw pgtype.Text) error {
-	_, err := q.db.Exec(ctx, createMessage, raw)
+type CreateMessageParams struct {
+	Raw      pgtype.Text
+	RawJsonb []byte
+}
+
+func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) error {
+	_, err := q.db.Exec(ctx, createMessage, arg.Raw, arg.RawJsonb)
 	return err
 }
 
@@ -43,7 +49,7 @@ func (q *Queries) GetMessage(ctx context.Context, id int64) (Message, error) {
 }
 
 const getMessagesAsc = `-- name: GetMessagesAsc :many
-SELECT id, raw, raw_jsonb, created_at FROM messages ORDER BY id ASC LIMIT $1 OFFSET $2
+SELECT id, created_at, raw FROM messages ORDER BY id ASC LIMIT $1 OFFSET $2
 `
 
 type GetMessagesAscParams struct {
@@ -51,21 +57,22 @@ type GetMessagesAscParams struct {
 	Offset int32
 }
 
-func (q *Queries) GetMessagesAsc(ctx context.Context, arg GetMessagesAscParams) ([]Message, error) {
+type GetMessagesAscRow struct {
+	ID        int64
+	CreatedAt pgtype.Timestamp
+	Raw       pgtype.Text
+}
+
+func (q *Queries) GetMessagesAsc(ctx context.Context, arg GetMessagesAscParams) ([]GetMessagesAscRow, error) {
 	rows, err := q.db.Query(ctx, getMessagesAsc, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Message
+	var items []GetMessagesAscRow
 	for rows.Next() {
-		var i Message
-		if err := rows.Scan(
-			&i.ID,
-			&i.Raw,
-			&i.RawJsonb,
-			&i.CreatedAt,
-		); err != nil {
+		var i GetMessagesAscRow
+		if err := rows.Scan(&i.ID, &i.CreatedAt, &i.Raw); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -77,7 +84,7 @@ func (q *Queries) GetMessagesAsc(ctx context.Context, arg GetMessagesAscParams) 
 }
 
 const getMessagesDesc = `-- name: GetMessagesDesc :many
-SELECT id, raw, raw_jsonb, created_at FROM messages ORDER BY id DESC LIMIT $1 OFFSET $2
+SELECT id, created_at, raw FROM messages ORDER BY id DESC LIMIT $1 OFFSET $2
 `
 
 type GetMessagesDescParams struct {
@@ -85,21 +92,22 @@ type GetMessagesDescParams struct {
 	Offset int32
 }
 
-func (q *Queries) GetMessagesDesc(ctx context.Context, arg GetMessagesDescParams) ([]Message, error) {
+type GetMessagesDescRow struct {
+	ID        int64
+	CreatedAt pgtype.Timestamp
+	Raw       pgtype.Text
+}
+
+func (q *Queries) GetMessagesDesc(ctx context.Context, arg GetMessagesDescParams) ([]GetMessagesDescRow, error) {
 	rows, err := q.db.Query(ctx, getMessagesDesc, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Message
+	var items []GetMessagesDescRow
 	for rows.Next() {
-		var i Message
-		if err := rows.Scan(
-			&i.ID,
-			&i.Raw,
-			&i.RawJsonb,
-			&i.CreatedAt,
-		); err != nil {
+		var i GetMessagesDescRow
+		if err := rows.Scan(&i.ID, &i.CreatedAt, &i.Raw); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
