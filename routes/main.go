@@ -12,4 +12,9 @@ func AddV1(e *echo.Echo) {
 	prefix := "/messages"
 	group.POST(prefix, handlers.CreateMessage)
 	group.GET(prefix, handlers.GetMessages)
+
+	// source
+	prefix = "/sources"
+	group.POST(prefix, handlers.CreateSource)
+	group.GET(prefix, handlers.GetSources)
 }

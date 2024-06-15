@@ -16,24 +16,26 @@ INSERT INTO messages (
     id, 
     created_at,
     raw,
-    raw_jsonb
+    raw_jsonb,
+    source_id
 ) VALUES (
-    DEFAULT, NOW(), $1, $2
+    DEFAULT, NOW(), $1, $2, $3
 )
 `
 
 type CreateMessageParams struct {
 	Raw      pgtype.Text
 	RawJsonb []byte
+	SourceID int32
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) error {
-	_, err := q.db.Exec(ctx, createMessage, arg.Raw, arg.RawJsonb)
+	_, err := q.db.Exec(ctx, createMessage, arg.Raw, arg.RawJsonb, arg.SourceID)
 	return err
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT id, raw, raw_jsonb, created_at FROM messages WHERE id = $1 LIMIT 1
+SELECT id, raw, raw_jsonb, created_at, source_id FROM messages WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetMessage(ctx context.Context, id int64) (Message, error) {
@@ -44,6 +46,7 @@ func (q *Queries) GetMessage(ctx context.Context, id int64) (Message, error) {
 		&i.Raw,
 		&i.RawJsonb,
 		&i.CreatedAt,
+		&i.SourceID,
 	)
 	return i, err
 }

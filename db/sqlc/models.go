@@ -5,6 +5,8 @@
 package sqlc
 
 import (
+	"net/netip"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -13,4 +15,10 @@ type Message struct {
 	Raw       pgtype.Text
 	RawJsonb  []byte
 	CreatedAt pgtype.Timestamp
+	SourceID  int32
+}
+
+type Source struct {
+	ID pgtype.Int4
+	Ip netip.Addr
 }

@@ -6,9 +6,10 @@ INSERT INTO messages (
     id, 
     created_at,
     raw,
-    raw_jsonb
+    raw_jsonb,
+    source_id
 ) VALUES (
-    DEFAULT, NOW(), $1, $2
+    DEFAULT, NOW(), $1, $2, $3
 );
 
 -- name: GetMessagesAsc :many

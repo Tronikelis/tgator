@@ -2,5 +2,13 @@ CREATE TABLE IF NOT EXISTS messages (
     id bigserial PRIMARY KEY,
     raw text,
     raw_jsonb jsonb,
-    created_at timestamp
+    created_at timestamp NOT NULL,
+
+    source_id int REFERENCES sources ON DELETE CASCADE NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS sources (
+    id serial,
+    ip inet NOT NULL
+);
+
