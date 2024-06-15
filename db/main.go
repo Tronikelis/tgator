@@ -39,7 +39,7 @@ func (db *DB) CreateSchema(filename string) error {
 
 	defer conn.Conn().Close(context.Background())
 
-	if _, err := conn.Query(context.Background(), schemaSql); err != nil {
+	if _, err := conn.Exec(context.Background(), schemaSql); err != nil {
 		return err
 	}
 

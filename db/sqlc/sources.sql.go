@@ -13,7 +13,7 @@ import (
 const createSource = `-- name: CreateSource :exec
 INSERT INTO sources (
     id,
-    ip
+    ip 
 ) VALUES (
     DEFAULT, $1
 )
@@ -22,6 +22,17 @@ INSERT INTO sources (
 func (q *Queries) CreateSource(ctx context.Context, ip netip.Addr) error {
 	_, err := q.db.Exec(ctx, createSource, ip)
 	return err
+}
+
+const getSourceByIp = `-- name: GetSourceByIp :one
+SELECT id, ip FROM sources WHERE ip = $1 LIMIT 1
+`
+
+func (q *Queries) GetSourceByIp(ctx context.Context, ip netip.Addr) (Source, error) {
+	row := q.db.QueryRow(ctx, getSourceByIp, ip)
+	var i Source
+	err := row.Scan(&i.ID, &i.Ip)
+	return i, err
 }
 
 const getSources = `-- name: GetSources :many

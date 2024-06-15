@@ -1,3 +1,8 @@
+CREATE TABLE IF NOT EXISTS sources (
+    id serial PRIMARY KEY,
+    ip inet NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS messages (
     id bigserial PRIMARY KEY,
     raw text,
@@ -5,10 +10,5 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at timestamp NOT NULL,
 
     source_id int REFERENCES sources ON DELETE CASCADE NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS sources (
-    id serial,
-    ip inet NOT NULL
 );
 

@@ -2,19 +2,40 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
+	"net/netip"
+	"strings"
 	"tgator/binds"
 	"tgator/db/sqlc"
 	"tgator/dtos"
 	"tgator/middleware"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
 func CreateMessage(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
+	ctx := c.Request().Context()
+
+	remoteAddr := c.Request().RemoteAddr
+	remoteAddr = strings.Split(remoteAddr, ":")[0]
+
+	remoteAddrIp, err := netip.ParseAddr(remoteAddr)
+	if err != nil {
+		return err
+	}
+
+	source, err := cc.Queries.GetSourceByIp(ctx, remoteAddrIp)
+	if err == pgx.ErrNoRows {
+		return errors.New("unknown ip")
+	}
+	if err != nil {
+		return err
+	}
 
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
@@ -30,7 +51,8 @@ func CreateMessage(c echo.Context) error {
 	}
 
 	params := sqlc.CreateMessageParams{
-		Raw: pgtype.Text{String: bodyStr, Valid: true},
+		Raw:      pgtype.Text{String: bodyStr, Valid: true},
+		SourceID: source.ID,
 	}
 
 	if json.Valid(body) {
@@ -38,7 +60,7 @@ func CreateMessage(c echo.Context) error {
 	}
 
 	err = cc.Queries.CreateMessage(
-		cc.Request().Context(),
+		ctx,
 		params,
 	)
 

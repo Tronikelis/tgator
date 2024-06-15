@@ -19,6 +19,6 @@ type Message struct {
 }
 
 type Source struct {
-	ID pgtype.Int4
+	ID int32
 	Ip netip.Addr
 }
