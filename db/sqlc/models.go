@@ -9,7 +9,8 @@ import (
 )
 
 type Message struct {
-	ID        int32
+	ID        int64
 	Raw       pgtype.Text
+	RawJsonb  []byte
 	CreatedAt pgtype.Timestamp
 }

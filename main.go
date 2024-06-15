@@ -35,5 +35,7 @@ func main() {
 
 	routes.AddV1(e)
 
-	e.Start("localhost:3000")
+	if err := e.Start("localhost:3000"); err != nil {
+		panic(err)
+	}
 }
