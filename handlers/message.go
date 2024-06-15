@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"tgator/binds"
@@ -28,9 +29,17 @@ func CreateMessage(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
+	params := sqlc.CreateMessageParams{
+		Raw: pgtype.Text{String: bodyStr, Valid: true},
+	}
+
+	if json.Valid(body) {
+		params.RawJsonb = body
+	}
+
 	err = cc.Queries.CreateMessage(
 		cc.Request().Context(),
-		pgtype.Text{String: bodyStr, Valid: true},
+		params,
 	)
 
 	if err != nil {
@@ -44,16 +53,14 @@ func GetMessages(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
 	paginationBind := binds.PaginationBind{}
-
 	if err := c.Bind(&paginationBind); err != nil {
 		return err
 	}
-
 	if paginationBind.Limit == 0 {
 		paginationBind.Limit = 50
 	}
 
-	paginationDto := dtos.PaginationDTO[sqlc.Message]{
+	paginationDto := dtos.PaginationDTO[sqlc.GetMessagesDescRow]{
 		Limit:  paginationBind.Limit,
 		Offset: paginationBind.Limit * paginationBind.Page,
 	}
