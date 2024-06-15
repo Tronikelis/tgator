@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	echo_middleware "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -29,6 +30,8 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.GetCustomContextMiddleware(sqlc.New(db.Pool)))
+
+	e.Use(echo_middleware.Logger())
 
 	routes.AddV1(e)
 
