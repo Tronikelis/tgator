@@ -70,13 +70,10 @@ func GetMessages(c echo.Context) error {
 	if err := c.Bind(&paginationBind); err != nil {
 		return err
 	}
-	if paginationBind.Limit == 0 {
-		paginationBind.Limit = 50
-	}
 
 	paginationDto := dtos.PaginationDTO[sqlc.GetMessagesDescRow]{
-		Limit:  paginationBind.Limit,
-		Offset: paginationBind.Limit * paginationBind.Page,
+		Limit:  paginationBind.Limit(),
+		Offset: paginationBind.Offset(),
 	}
 
 	messages, err := cc.Queries.GetMessagesDesc(c.Request().Context(), sqlc.GetMessagesDescParams{

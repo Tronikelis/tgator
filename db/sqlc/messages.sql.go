@@ -128,3 +128,40 @@ func (q *Queries) GetMessagesDesc(ctx context.Context, arg GetMessagesDescParams
 	}
 	return items, nil
 }
+
+const getMessagesWhereSourceId = `-- name: GetMessagesWhereSourceId :many
+SELECT id, raw, created_at FROM messages WHERE messages.source_id = $1 
+    ORDER BY id DESC LIMIT $2 OFFSET $3
+`
+
+type GetMessagesWhereSourceIdParams struct {
+	SourceID int32
+	Limit    int32
+	Offset   int32
+}
+
+type GetMessagesWhereSourceIdRow struct {
+	ID        int64
+	Raw       pgtype.Text
+	CreatedAt pgtype.Timestamp
+}
+
+func (q *Queries) GetMessagesWhereSourceId(ctx context.Context, arg GetMessagesWhereSourceIdParams) ([]GetMessagesWhereSourceIdRow, error) {
+	rows, err := q.db.Query(ctx, getMessagesWhereSourceId, arg.SourceID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMessagesWhereSourceIdRow
+	for rows.Next() {
+		var i GetMessagesWhereSourceIdRow
+		if err := rows.Scan(&i.ID, &i.Raw, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

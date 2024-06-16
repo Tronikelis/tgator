@@ -18,3 +18,7 @@ SELECT id, created_at, raw FROM messages ORDER BY id ASC LIMIT $1 OFFSET $2;
 -- name: GetMessagesDesc :many
 SELECT id, created_at, raw FROM messages ORDER BY id DESC LIMIT $1 OFFSET $2;
 
+
+-- name: GetMessagesWhereSourceId :many
+SELECT id, raw, created_at FROM messages WHERE messages.source_id = $1 
+    ORDER BY id DESC LIMIT $2 OFFSET $3;
