@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -46,10 +45,6 @@ func CreateMessage(c echo.Context) error {
 	params := sqlc.CreateMessageParams{
 		Raw:      pgtype.Text{String: bodyStr, Valid: true},
 		SourceID: source.ID,
-	}
-
-	if json.Valid(body) {
-		params.RawJsonb = body
 	}
 
 	message, err := cc.Queries.CreateMessage(

@@ -16,26 +16,23 @@ INSERT INTO messages (
     id, 
     created_at,
     raw,
-    raw_jsonb,
     source_id
 ) VALUES (
-    DEFAULT, NOW(), $1, $2, $3
-) RETURNING id, raw, raw_jsonb, created_at, source_id
+    DEFAULT, NOW(), $1, $2
+) RETURNING id, raw, created_at, source_id
 `
 
 type CreateMessageParams struct {
 	Raw      pgtype.Text
-	RawJsonb []byte
 	SourceID int32
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
-	row := q.db.QueryRow(ctx, createMessage, arg.Raw, arg.RawJsonb, arg.SourceID)
+	row := q.db.QueryRow(ctx, createMessage, arg.Raw, arg.SourceID)
 	var i Message
 	err := row.Scan(
 		&i.ID,
 		&i.Raw,
-		&i.RawJsonb,
 		&i.CreatedAt,
 		&i.SourceID,
 	)
@@ -43,7 +40,7 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 }
 
 const getMessage = `-- name: GetMessage :one
-SELECT id, raw, raw_jsonb, created_at, source_id FROM messages WHERE id = $1 LIMIT 1
+SELECT id, raw, created_at, source_id FROM messages WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetMessage(ctx context.Context, id int64) (Message, error) {
@@ -52,7 +49,6 @@ func (q *Queries) GetMessage(ctx context.Context, id int64) (Message, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Raw,
-		&i.RawJsonb,
 		&i.CreatedAt,
 		&i.SourceID,
 	)
@@ -130,12 +126,13 @@ func (q *Queries) GetMessagesDesc(ctx context.Context, arg GetMessagesDescParams
 }
 
 const getMessagesWhereSourceId = `-- name: GetMessagesWhereSourceId :many
-SELECT id, raw, created_at FROM messages WHERE messages.source_id = $1 
-    ORDER BY id DESC LIMIT $2 OFFSET $3
+SELECT id, raw, created_at FROM messages WHERE source_id = $1 AND raw ilike $2
+    ORDER BY id DESC LIMIT $3 OFFSET $4
 `
 
 type GetMessagesWhereSourceIdParams struct {
 	SourceID int32
+	Raw      pgtype.Text
 	Limit    int32
 	Offset   int32
 }
@@ -147,7 +144,12 @@ type GetMessagesWhereSourceIdRow struct {
 }
 
 func (q *Queries) GetMessagesWhereSourceId(ctx context.Context, arg GetMessagesWhereSourceIdParams) ([]GetMessagesWhereSourceIdRow, error) {
-	rows, err := q.db.Query(ctx, getMessagesWhereSourceId, arg.SourceID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, getMessagesWhereSourceId,
+		arg.SourceID,
+		arg.Raw,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}

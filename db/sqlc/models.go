@@ -11,7 +11,6 @@ import (
 type Message struct {
 	ID        int64
 	Raw       pgtype.Text
-	RawJsonb  []byte
 	CreatedAt pgtype.Timestamp
 	SourceID  int32
 }
