@@ -31,9 +31,6 @@ func CreateMessage(c echo.Context) error {
 	source, err := cc.Queries.GetSourceByIp(ctx, remoteAddrIp)
 	if err == pgx.ErrNoRows {
 		source, err = cc.Queries.CreateSource(ctx, remoteAddrIp)
-		if err != nil {
-			return err
-		}
 	}
 	if err != nil {
 		return err
