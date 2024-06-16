@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"net/netip"
 	"tgator/binds"
 	"tgator/middleware"
 
@@ -17,14 +16,9 @@ func CreateSource(c echo.Context) error {
 		return err
 	}
 
-	ip, err := netip.ParseAddr(sourceBind.Ip)
-	if err != nil {
-		return err
-	}
-
 	source, err := cc.Queries.CreateSource(
 		c.Request().Context(),
-		ip,
+		sourceBind.Ip,
 	)
 	if err != nil {
 		return err

@@ -5,8 +5,6 @@
 package sqlc
 
 import (
-	"net/netip"
-
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -20,5 +18,5 @@ type Message struct {
 
 type Source struct {
 	ID int32
-	Ip netip.Addr
+	Ip string
 }

@@ -7,7 +7,6 @@ package sqlc
 
 import (
 	"context"
-	"net/netip"
 )
 
 const createSource = `-- name: CreateSource :one
@@ -19,7 +18,7 @@ INSERT INTO sources (
 ) RETURNING id, ip
 `
 
-func (q *Queries) CreateSource(ctx context.Context, ip netip.Addr) (Source, error) {
+func (q *Queries) CreateSource(ctx context.Context, ip string) (Source, error) {
 	row := q.db.QueryRow(ctx, createSource, ip)
 	var i Source
 	err := row.Scan(&i.ID, &i.Ip)
@@ -30,7 +29,7 @@ const getSourceByIp = `-- name: GetSourceByIp :one
 SELECT id, ip FROM sources WHERE ip = $1 LIMIT 1
 `
 
-func (q *Queries) GetSourceByIp(ctx context.Context, ip netip.Addr) (Source, error) {
+func (q *Queries) GetSourceByIp(ctx context.Context, ip string) (Source, error) {
 	row := q.db.QueryRow(ctx, getSourceByIp, ip)
 	var i Source
 	err := row.Scan(&i.ID, &i.Ip)

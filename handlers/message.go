@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/netip"
 	"strings"
 	"tgator/binds"
 	"tgator/db/sqlc"
@@ -23,14 +22,9 @@ func CreateMessage(c echo.Context) error {
 	remoteAddr := c.Request().RemoteAddr
 	remoteAddr = strings.Split(remoteAddr, ":")[0]
 
-	remoteAddrIp, err := netip.ParseAddr(remoteAddr)
-	if err != nil {
-		return err
-	}
-
-	source, err := cc.Queries.GetSourceByIp(ctx, remoteAddrIp)
+	source, err := cc.Queries.GetSourceByIp(ctx, remoteAddr)
 	if err == pgx.ErrNoRows {
-		source, err = cc.Queries.CreateSource(ctx, remoteAddrIp)
+		source, err = cc.Queries.CreateSource(ctx, remoteAddr)
 	}
 	if err != nil {
 		return err

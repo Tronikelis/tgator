@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS sources (
     id serial PRIMARY KEY,
-    ip inet NOT NULL UNIQUE
+    ip varchar(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS messages (
