@@ -7,7 +7,11 @@ export default function SourcesId() {
     const params = useParams();
     const sourceId = () => params.id;
 
-    const { data: messages } = useMessages(() => ({ sourceId: sourceId() }));
+    const { data: messages } = useMessages(() => {
+        const s = sourceId();
+        if (!s) return;
+        return { sourceId: s };
+    });
 
     return (
         <Stack class="gap-4 p-12">
