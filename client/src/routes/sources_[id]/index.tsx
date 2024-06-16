@@ -1,5 +1,6 @@
 import { useParams } from "@solidjs/router";
 import useMessages from "hooks/swr/useMessages";
+import { Card, Stack, Text } from "solid-daisy";
 import { For } from "solid-js";
 
 export default function SourcesId() {
@@ -9,16 +10,20 @@ export default function SourcesId() {
     const { data: messages } = useMessages(() => ({ sourceId: sourceId() }));
 
     return (
-        <div class="flex flex-col gap-4 items-center justify-center m-10">
-            <p>source: {sourceId()}</p>
+        <Stack class="gap-4 p-12">
+            <Card>
+                <Text>source: {sourceId()}</Text>
+            </Card>
 
-            <For each={messages.v?.Data}>
-                {msg => (
-                    <div class="self-stretch border border-black">
-                        <p class="font-mono">{msg.Raw}</p>
-                    </div>
-                )}
-            </For>
-        </div>
+            <Stack class="gap-0">
+                <For each={messages.v?.Data}>
+                    {msg => (
+                        <Card class="rounded-none">
+                            <Text class="font-mono">{msg.Raw}</Text>
+                        </Card>
+                    )}
+                </For>
+            </Stack>
+        </Stack>
     );
 }

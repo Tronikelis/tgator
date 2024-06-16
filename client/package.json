@@ -7,12 +7,17 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@solid-primitives/event-listener": "2.3.3",
+        "@solid-primitives/refs": "1.0.8",
         "@solidjs/router": "0.13.5",
         "autoprefixer": "10.4.19",
+        "daisyui": "4.12.2",
         "gauk": "1.0.0",
         "postcss": "8.4.38",
         "prettier": "3.3.2",
         "prettier-config-tronikelis": "3.0.0",
+        "solid-controlled-input": "4.0.0",
+        "solid-daisy": "1.6.0",
         "solid-js": "1.8.17",
         "solid-swr": "4.0.9",
         "tailwindcss": "3.4.4",
