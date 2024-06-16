@@ -11,7 +11,7 @@ export default function Idx() {
             <For each={data.v}>
                 {source => (
                     <div>
-                        <a href={urlbat("/source/:id", { id: source.ID })} class="font-mono">
+                        <a href={urlbat("/sources/:id", { id: source.ID })} class="font-mono">
                             {source.Ip}
                         </a>
                     </div>

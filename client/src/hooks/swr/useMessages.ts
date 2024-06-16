@@ -5,11 +5,11 @@ import { SwrArg } from "types/swr";
 import { createSwrKey } from "utils/swr";
 
 type Arg = {
-    sourceId: number;
+    sourceId: string | number;
 };
 
 export default function useMessages(arg: SwrArg<Arg>) {
-    const key = createSwrKey("/messages/:sourceId", arg);
+    const key = createSwrKey("/sources/:sourceId/messages", arg);
 
     const swr = useSWR<PaginationDTO<MessageDTO[]>>(key);
 
