@@ -1,7 +1,7 @@
 -- name: GetMessage :one
 SELECT * FROM messages WHERE id = $1 LIMIT 1;
 
--- name: CreateMessage :exec
+-- name: CreateMessage :one
 INSERT INTO messages (
     id, 
     created_at,
@@ -10,7 +10,7 @@ INSERT INTO messages (
     source_id
 ) VALUES (
     DEFAULT, NOW(), $1, $2, $3
-);
+) RETURNING *;
 
 -- name: GetMessagesAsc :many
 SELECT id, created_at, raw FROM messages ORDER BY id ASC LIMIT $1 OFFSET $2;

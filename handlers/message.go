@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/netip"
@@ -31,7 +30,10 @@ func CreateMessage(c echo.Context) error {
 
 	source, err := cc.Queries.GetSourceByIp(ctx, remoteAddrIp)
 	if err == pgx.ErrNoRows {
-		return errors.New("unknown ip")
+		source, err = cc.Queries.CreateSource(ctx, remoteAddrIp)
+		if err != nil {
+			return err
+		}
 	}
 	if err != nil {
 		return err
@@ -59,16 +61,15 @@ func CreateMessage(c echo.Context) error {
 		params.RawJsonb = body
 	}
 
-	err = cc.Queries.CreateMessage(
+	message, err := cc.Queries.CreateMessage(
 		ctx,
 		params,
 	)
-
 	if err != nil {
-		return echo.ErrBadGateway
+		return err
 	}
 
-	return nil
+	return c.JSON(http.StatusOK, message)
 }
 
 func GetMessages(c echo.Context) error {

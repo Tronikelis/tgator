@@ -22,7 +22,7 @@ func CreateSource(c echo.Context) error {
 		return err
 	}
 
-	err = cc.Queries.CreateSource(
+	source, err := cc.Queries.CreateSource(
 		c.Request().Context(),
 		ip,
 	)
@@ -30,7 +30,7 @@ func CreateSource(c echo.Context) error {
 		return err
 	}
 
-	return nil
+	return c.JSON(http.StatusOK, source)
 }
 
 func GetSources(c echo.Context) error {

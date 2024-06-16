@@ -1,10 +1,10 @@
--- name: CreateSource :exec
+-- name: CreateSource :one
 INSERT INTO sources (
     id,
     ip 
 ) VALUES (
     DEFAULT, $1
-);
+) RETURNING *;
 
 -- name: GetSources :many
 SELECT id, ip FROM sources ORDER BY id DESC;

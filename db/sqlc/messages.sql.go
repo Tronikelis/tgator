@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createMessage = `-- name: CreateMessage :exec
+const createMessage = `-- name: CreateMessage :one
 INSERT INTO messages (
     id, 
     created_at,
@@ -20,7 +20,7 @@ INSERT INTO messages (
     source_id
 ) VALUES (
     DEFAULT, NOW(), $1, $2, $3
-)
+) RETURNING id, raw, raw_jsonb, created_at, source_id
 `
 
 type CreateMessageParams struct {
@@ -29,9 +29,17 @@ type CreateMessageParams struct {
 	SourceID int32
 }
 
-func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) error {
-	_, err := q.db.Exec(ctx, createMessage, arg.Raw, arg.RawJsonb, arg.SourceID)
-	return err
+func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
+	row := q.db.QueryRow(ctx, createMessage, arg.Raw, arg.RawJsonb, arg.SourceID)
+	var i Message
+	err := row.Scan(
+		&i.ID,
+		&i.Raw,
+		&i.RawJsonb,
+		&i.CreatedAt,
+		&i.SourceID,
+	)
+	return i, err
 }
 
 const getMessage = `-- name: GetMessage :one

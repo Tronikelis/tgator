@@ -10,18 +10,20 @@ import (
 	"net/netip"
 )
 
-const createSource = `-- name: CreateSource :exec
+const createSource = `-- name: CreateSource :one
 INSERT INTO sources (
     id,
     ip 
 ) VALUES (
     DEFAULT, $1
-)
+) RETURNING id, ip
 `
 
-func (q *Queries) CreateSource(ctx context.Context, ip netip.Addr) error {
-	_, err := q.db.Exec(ctx, createSource, ip)
-	return err
+func (q *Queries) CreateSource(ctx context.Context, ip netip.Addr) (Source, error) {
+	row := q.db.QueryRow(ctx, createSource, ip)
+	var i Source
+	err := row.Scan(&i.ID, &i.Ip)
+	return i, err
 }
 
 const getSourceByIp = `-- name: GetSourceByIp :one
