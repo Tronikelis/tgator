@@ -4,6 +4,9 @@ import Gauk from "gauk";
 import { SWROptionsProvider } from "solid-swr";
 
 import Idx from "routes/idx";
+import SourceId from "routes/source_[id]";
+
+import "./main.css";
 
 function App() {
     const fetcher = new Gauk({
@@ -17,9 +20,10 @@ function App() {
     });
 
     return (
-        <SWROptionsProvider value={{ fetcher: key => fetcher.get(key) }}>
+        <SWROptionsProvider value={{ fetcher: key => fetcher.get(key).then(x => x.data) }}>
             <Router>
                 <Route path="/" component={Idx} />
+                <Route path="/source/:id" component={SourceId} />
             </Router>
         </SWROptionsProvider>
     );
