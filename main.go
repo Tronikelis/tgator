@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"tgator/db"
-	"tgator/db/sqlc"
 	"tgator/middleware"
 	"tgator/routes"
 
@@ -23,13 +22,13 @@ func main() {
 		panic(err)
 	}
 
-	// if err := db.CreateSchema("./db/schema.sql"); err != nil {
-	// 	panic(err)
-	// }
+	if err := db.CreateSchema("./db/schema.sql"); err != nil {
+		panic(err)
+	}
 
 	e := echo.New()
 
-	e.Use(middleware.GetCustomContextMiddleware(sqlc.New(db.Pool), db))
+	e.Use(middleware.GetCustomContextMiddleware(db))
 
 	e.Use(echo_middleware.Logger())
 
