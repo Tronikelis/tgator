@@ -23,13 +23,13 @@ func main() {
 		panic(err)
 	}
 
-	if err := db.CreateSchema("./db/schema.sql"); err != nil {
-		panic(err)
-	}
+	// if err := db.CreateSchema("./db/schema.sql"); err != nil {
+	// 	panic(err)
+	// }
 
 	e := echo.New()
 
-	e.Use(middleware.GetCustomContextMiddleware(sqlc.New(db.Pool)))
+	e.Use(middleware.GetCustomContextMiddleware(sqlc.New(db.Pool), db))
 
 	e.Use(echo_middleware.Logger())
 

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS sources (
 CREATE TABLE IF NOT EXISTS messages (
     id bigserial PRIMARY KEY,
     raw text,
-    created_at timestamp NOT NULL,
+    created_at timestamp NOT NULL DEFAULT NOW(),
 
     source_id int REFERENCES sources ON DELETE CASCADE NOT NULL
 );
