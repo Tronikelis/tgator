@@ -37,7 +37,7 @@ func structToMap(v any) StructFieldMap {
 func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) []any {
 	structMap := structToMap(strct)
 
-	pointers := []interface{}{}
+	pointers := []any{}
 
 	for _, d := range ds {
 		value, exists := structMap[d.Name]
