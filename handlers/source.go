@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"tgator/binds"
 	"tgator/db"
@@ -9,6 +10,7 @@ import (
 	"tgator/models"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -53,6 +55,18 @@ func GetSources(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	rows, err := cc.DB.Pool.Query(cc.ReqCtx(), query, params...)
+	if err != nil {
+		return err
+	}
+
+	sourcess, err := pgx.CollectRows(rows, db.RowToStruct[models.SourceModel])
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%+v", sourcess)
 
 	sources, err := db.QueryMany[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
 	if err != nil {

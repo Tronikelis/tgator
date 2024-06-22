@@ -22,9 +22,9 @@ func main() {
 		panic(err)
 	}
 
-	if err := db.CreateSchema("./db/schema.sql"); err != nil {
-		panic(err)
-	}
+	// if err := db.CreateSchema("./db/schema.sql"); err != nil {
+	// 	panic(err)
+	// }
 
 	e := echo.New()
 

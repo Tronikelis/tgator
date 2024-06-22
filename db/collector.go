@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/jackc/pgx/v5"
@@ -9,14 +10,14 @@ import (
 
 type StructFieldMap map[string]reflect.Value
 
-func structToMap(v any) StructFieldMap {
+func structToMap(v any) (StructFieldMap, error) {
 	mp := StructFieldMap{}
 
-	val := reflect.ValueOf(v)
-	typ := reflect.TypeOf(v)
+	val := reflect.ValueOf(v).Elem()
+	typ := reflect.TypeOf(v).Elem()
 
 	if typ.Kind() != reflect.Struct {
-		panic("wanted struct")
+		return StructFieldMap{}, fmt.Errorf("wanted struct, got %v", typ.Kind().String())
 	}
 
 	for i := 0; i < val.NumField(); i++ {
@@ -31,28 +32,31 @@ func structToMap(v any) StructFieldMap {
 		mp[name] = fieldVal
 	}
 
-	return mp
+	return mp, nil
 }
 
-func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) []any {
-	structMap := structToMap(strct)
+func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) ([]any, error) {
+	structMap, err := structToMap(strct)
+	if err != nil {
+		return []any{}, err
+	}
 
 	pointers := []any{}
 
 	for _, d := range ds {
 		value, exists := structMap[d.Name]
 		if !exists {
-			panic("map does not have value")
+			return []any{}, fmt.Errorf("%v does not exist in struct", d.Name)
 		}
 
-		pointers = append(pointers, value.Addr().Pointer())
+		pointers = append(pointers, value.Addr().Interface())
 	}
 
-	return pointers
+	return pointers, nil
 }
 
 func splitDescriptionsByTable(ds []pgconn.FieldDescription) [][]pgconn.FieldDescription {
-	descriptions := [][]pgconn.FieldDescription{}
+	split := [][]pgconn.FieldDescription{}
 
 	var currentId uint32
 	description := []pgconn.FieldDescription{}
@@ -63,14 +67,16 @@ func splitDescriptionsByTable(ds []pgconn.FieldDescription) [][]pgconn.FieldDesc
 		if currentId == 0 {
 			currentId = tableId
 		} else if currentId != tableId {
-			descriptions = append(descriptions, description)
+			split = append(split, description)
 			description = []pgconn.FieldDescription{}
 		}
 
 		description = append(description, d)
 	}
 
-	return descriptions
+	split = append(split, description)
+
+	return split
 }
 
 func RowToStruct[T any](row pgx.CollectableRow) (T, error) {
@@ -80,7 +86,11 @@ func RowToStruct[T any](row pgx.CollectableRow) (T, error) {
 
 	first := descriptions[0]
 
-	pointers := descriptionsToPointers(first, &t)
+	pointers, err := descriptionsToPointers(first, &t)
+	if err != nil {
+		return t, err
+	}
+
 	if err := row.Scan(pointers...); err != nil {
 		return t, err
 	}
