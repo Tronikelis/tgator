@@ -66,7 +66,7 @@ func QueryOne[T any](
 		return t, err
 	}
 
-	return pgx.CollectOneRow(rows, pgx.RowToStructByName[T])
+	return pgx.CollectOneRow(rows, RowToStruct[T])
 }
 
 func QueryMany[T any](
@@ -81,5 +81,5 @@ func QueryMany[T any](
 		return t, err
 	}
 
-	return pgx.CollectRows(rows, pgx.RowToStructByName[T])
+	return pgx.CollectRows(rows, RowToStruct[T])
 }

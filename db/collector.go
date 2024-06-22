@@ -10,7 +10,7 @@ import (
 
 type StructFieldMap map[string]reflect.Value
 
-func structToMap(v any) (StructFieldMap, error) {
+func structToMapPtrs(v any) (StructFieldMap, error) {
 	mp := StructFieldMap{}
 
 	val := reflect.ValueOf(v).Elem()
@@ -27,16 +27,18 @@ func structToMap(v any) (StructFieldMap, error) {
 		name := fieldTyp.Tag.Get("db")
 		if name == "" {
 			name = fieldTyp.Name
+		} else if name == "-" {
+			continue
 		}
 
-		mp[name] = fieldVal
+		mp[name] = fieldVal.Addr()
 	}
 
 	return mp, nil
 }
 
 func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) ([]any, error) {
-	structMap, err := structToMap(strct)
+	structMap, err := structToMapPtrs(strct)
 	if err != nil {
 		return []any{}, err
 	}
@@ -47,11 +49,12 @@ func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) ([]any, err
 		value, exists := structMap[d.Name]
 		if !exists {
 			// the struct does not have a corresponding field
-			pointers = append(pointers, new(any))
+			var trash any
+			pointers = append(pointers, trash)
 			continue
 		}
 
-		pointers = append(pointers, value.Addr().Interface())
+		pointers = append(pointers, value.Interface())
 	}
 
 	return pointers, nil
@@ -69,6 +72,8 @@ func splitDescriptionsByTable(ds []pgconn.FieldDescription) [][]pgconn.FieldDesc
 		if currentId == 0 {
 			currentId = tableId
 		} else if currentId != tableId {
+			currentId = tableId
+
 			split = append(split, description)
 			description = []pgconn.FieldDescription{}
 		}
@@ -88,7 +93,9 @@ func nestedStructsPtrs(strct any) []any {
 	nested := []any{}
 
 	for i := 0; i < val.NumField(); i++ {
-		if typ.Field(i).Type.Kind() != reflect.Struct {
+		fieldTyp := typ.Field(i)
+
+		if _, exists := fieldTyp.Tag.Lookup("embedded"); !exists {
 			continue
 		}
 
@@ -100,6 +107,8 @@ func nestedStructsPtrs(strct any) []any {
 
 func RowToStruct[T any](row pgx.CollectableRow) (T, error) {
 	descriptions := splitDescriptionsByTable(row.FieldDescriptions())
+
+	// fmt.Printf("%+v", descriptions)
 
 	var t T
 
@@ -116,9 +125,13 @@ func RowToStruct[T any](row pgx.CollectableRow) (T, error) {
 
 	toBeScanned := []any{}
 
+	fmt.Printf("descriptions: %+v\n\n", descriptions)
+
 	if _, err := traverseDescriptions(&toBeScanned, descriptions, 0, &t); err != nil {
 		return t, err
 	}
+
+	fmt.Printf("toBeScanned: %+v\n\n", toBeScanned)
 
 	if err := row.Scan(toBeScanned...); err != nil {
 		return t, err
@@ -145,6 +158,7 @@ func traverseDescriptions(
 	*toBeScanned = append(*toBeScanned, pointers...)
 
 	for _, nested := range nestedStructsPtrs(strct) {
+		fmt.Printf("nested: %+v\n\n", nested)
 		index, err = traverseDescriptions(toBeScanned, descriptions, index+1, nested)
 		if err != nil {
 			return 0, err

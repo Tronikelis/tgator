@@ -94,9 +94,14 @@ func GetMessages(c echo.Context) error {
 
 	query, params, err := cc.DB.PG.
 		From("messages").
+		Select(
+			goqu.I("messages.*"),
+			goqu.I("sources.*"),
+		).
+		LeftJoin(goqu.T("sources"), goqu.On(goqu.I("sources.id").Eq(goqu.I("messages.source_id")))).
 		Limit(paginationDto.Limit()).
 		Offset(paginationDto.Offset()).
-		Order(goqu.C("id").Desc()).
+		Order(goqu.I("messages.id").Desc()).
 		ToSQL()
 
 	if err != nil {
