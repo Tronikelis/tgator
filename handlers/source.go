@@ -88,7 +88,8 @@ func GetSourceMessages(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	paginationDto := dtos.PaginationDTO[models.MessageModel]{}.FromBind(bind.PaginationBind)
+	paginationDto := dtos.PaginationDTO[models.MessageModel]{}
+	paginationDto.SetFromBind(bind.PaginationBind)
 
 	query, params, err := cc.DB.PG.
 		From("messages").

@@ -11,10 +11,10 @@ type PaginationDTO[T any] struct {
 	Data   []T
 }
 
-func (p PaginationDTO[T]) FromBind(b binds.PaginationBind) PaginationDTO[T] {
-	return PaginationDTO[T]{
-		Page:   b.GetPage(),
-		Offset: b.GetOffset(),
-		Limit:  b.GetLimit(),
-	}
+func (p *PaginationDTO[T]) SetFromBind(b binds.PaginationBind) *PaginationDTO[T] {
+	p.Page = b.GetPage()
+	p.Limit = b.GetLimit()
+	p.Offset = b.GetOffset()
+
+	return p
 }
