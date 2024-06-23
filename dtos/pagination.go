@@ -12,9 +12,9 @@ type PaginationDTO[T any] struct {
 }
 
 func (p *PaginationDTO[T]) SetFromBind(b binds.PaginationBind) *PaginationDTO[T] {
-	p.Page = b.GetPage()
-	p.Limit = b.GetLimit()
-	p.Offset = b.GetOffset()
+	p.Page = b.SafePage()
+	p.Limit = b.SafeLimit()
+	p.Offset = b.SafeOffset()
 
 	return p
 }

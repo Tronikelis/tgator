@@ -5,7 +5,7 @@ type PaginationBind struct {
 	Limit int32 `query:"limit"`
 }
 
-func (p *PaginationBind) GetPage() int32 {
+func (p *PaginationBind) SafePage() int32 {
 	if p.Page <= 0 {
 		return p.Page
 	}
@@ -13,7 +13,7 @@ func (p *PaginationBind) GetPage() int32 {
 	return p.Page
 }
 
-func (p *PaginationBind) GetLimit() int32 {
+func (p *PaginationBind) SafeLimit() int32 {
 	if p.Limit <= 0 {
 		return 50
 	}
@@ -25,6 +25,6 @@ func (p *PaginationBind) GetLimit() int32 {
 	return p.Limit
 }
 
-func (p *PaginationBind) GetOffset() int32 {
-	return p.GetPage() * p.GetLimit()
+func (p *PaginationBind) SafeOffset() int32 {
+	return p.SafePage() * p.SafeLimit()
 }
