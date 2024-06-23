@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"database/sql"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -12,6 +12,7 @@ import (
 	"tgator/models"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,9 +28,8 @@ func CreateMessage(c echo.Context) error {
 	}
 
 	source, err := db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
-
-	if err == sql.ErrNoRows {
-		query, params, err = cc.DB.PG.
+	if errors.Is(err, pgx.ErrNoRows) {
+		query, params, err := cc.DB.PG.
 			Insert("sources").
 			Rows(models.SourceModel{
 				Ip: remoteAddr,
@@ -68,6 +68,7 @@ func CreateMessage(c echo.Context) error {
 				Raw:      bodyStr,
 			},
 		).
+		Returning("*").
 		ToSQL()
 
 	if err != nil {

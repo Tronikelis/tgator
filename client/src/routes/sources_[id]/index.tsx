@@ -1,5 +1,7 @@
 import { useParams } from "@solidjs/router";
+
 import useMessages from "hooks/swr/useMessages";
+import useSource from "hooks/swr/useSource";
 import { Card, Stack, Text } from "solid-daisy";
 import { For } from "solid-js";
 
@@ -7,16 +9,29 @@ export default function SourcesId() {
     const params = useParams();
     const sourceId = () => params.id;
 
-    const { data: messages } = useMessages(() => {
-        const s = sourceId();
-        if (!s) return;
-        return { sourceId: s };
+    const [{ data: messages }] = useMessages(
+        () => {
+            const id = sourceId();
+            if (!id) return;
+            return { sourceId: id };
+        },
+        { refreshInterval: 5e3 }
+    );
+
+    const [{ data: source }] = useSource(() => {
+        const id = sourceId();
+        if (!id) return;
+        return { id };
     });
 
     return (
-        <Stack class="gap-4 p-12">
+        <Stack class="gap-4">
             <Card>
-                <Text>source: {sourceId()}</Text>
+                <Stack>
+                    <Text bold>Source</Text>
+                    <Text>id: {source.v?.ID}</Text>
+                    <Text>ip: {source.v?.Ip}</Text>
+                </Stack>
             </Card>
 
             <Stack class="gap-0">

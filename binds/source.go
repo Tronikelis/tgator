@@ -8,3 +8,7 @@ type GetSourceMessagesBind struct {
 	PaginationBind
 	Id int32 `param:"id"`
 }
+
+type GetSourceBind struct {
+	Id int32 `param:"id"`
+}
