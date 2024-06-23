@@ -146,12 +146,12 @@ func traverseDescriptions(
 	strct any,
 ) (int, error) {
 	if index >= len(descriptions) {
-		return 0, nil
+		return index, nil
 	}
 
 	pointers, err := descriptionsToPointers(descriptions[index], strct)
 	if err != nil {
-		return 0, err
+		return index, err
 	}
 
 	*toBeScanned = append(*toBeScanned, pointers...)
@@ -159,7 +159,7 @@ func traverseDescriptions(
 	for _, nested := range nestedStructsPtrs(strct) {
 		index, err = traverseDescriptions(toBeScanned, descriptions, index+1, nested)
 		if err != nil {
-			return 0, err
+			return index, err
 		}
 	}
 
