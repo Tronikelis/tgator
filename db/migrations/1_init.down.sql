@@ -1,0 +1,3 @@
+DROP TABLE CASCADE messages;
+
+DROP TABLE CASCADE sources;
