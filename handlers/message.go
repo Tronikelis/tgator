@@ -1,32 +1,50 @@
 package handlers
 
 import (
+	"database/sql"
 	"io"
 	"net/http"
 	"strings"
 	"tgator/binds"
-	"tgator/db/sqlc"
+	"tgator/db"
 	"tgator/dtos"
 	"tgator/middleware"
+	"tgator/models"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/doug-martin/goqu/v9"
 	"github.com/labstack/echo/v4"
 )
 
 func CreateMessage(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
-	ctx := c.Request().Context()
 
 	remoteAddr := c.Request().RemoteAddr
 	remoteAddr = strings.Split(remoteAddr, ":")[0]
 
-	source, err := cc.Queries.GetSourceByIp(ctx, remoteAddr)
-	if err == pgx.ErrNoRows {
-		source, err = cc.Queries.CreateSource(ctx, remoteAddr)
-	}
+	query, params, err := cc.DB.PG.From("sources").Where(goqu.C("ip").Eq(remoteAddr)).ToSQL()
 	if err != nil {
 		return err
+	}
+
+	source, err := db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
+
+	if err == sql.ErrNoRows {
+		query, params, err = cc.DB.PG.
+			Insert("sources").
+			Rows(models.SourceModel{
+				Ip: remoteAddr,
+			}).
+			Returning("*").
+			ToSQL()
+
+		if err != nil {
+			return err
+		}
+
+		source, err = db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
+		if err != nil {
+			return err
+		}
 	}
 
 	body, err := io.ReadAll(c.Request().Body)
@@ -42,15 +60,21 @@ func CreateMessage(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	params := sqlc.CreateMessageParams{
-		Raw:      pgtype.Text{String: bodyStr, Valid: true},
-		SourceID: source.ID,
+	query, params, err = cc.DB.PG.
+		Insert("messages").
+		Rows(
+			models.MessageModel{
+				SourceId: source.ID,
+				Raw:      bodyStr,
+			},
+		).
+		ToSQL()
+
+	if err != nil {
+		return err
 	}
 
-	message, err := cc.Queries.CreateMessage(
-		ctx,
-		params,
-	)
+	message, err := db.QueryOne[models.MessageModel](cc.DB, cc.ReqCtx(), query, params...)
 	if err != nil {
 		return err
 	}
@@ -61,21 +85,31 @@ func CreateMessage(c echo.Context) error {
 func GetMessages(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
-	paginationBind := binds.PaginationBind{}
-	if err := c.Bind(&paginationBind); err != nil {
+	bind := binds.PaginationBind{}
+	if err := c.Bind(&bind); err != nil {
 		return err
 	}
 
-	paginationDto := dtos.PaginationDTO[sqlc.GetMessagesDescRow]{
-		Limit:  paginationBind.Limit(),
-		Offset: paginationBind.Offset(),
+	paginationDto := dtos.PaginationDTO[models.MessageModel]{}
+	paginationDto.SetFromBind(bind)
+
+	query, params, err := cc.DB.PG.
+		From("messages").
+		Select(
+			goqu.I("messages.*"),
+			goqu.I("sources.*"),
+		).
+		LeftJoin(goqu.T("sources"), goqu.On(goqu.I("sources.id").Eq(goqu.I("messages.source_id")))).
+		Limit(uint(paginationDto.Limit)).
+		Offset(uint(paginationDto.Offset)).
+		Order(goqu.I("messages.id").Desc()).
+		ToSQL()
+
+	if err != nil {
+		return err
 	}
 
-	messages, err := cc.Queries.GetMessagesDesc(c.Request().Context(), sqlc.GetMessagesDescParams{
-		Limit:  paginationDto.Limit,
-		Offset: paginationDto.Offset,
-	})
-
+	messages, err := db.QueryMany[models.MessageModel](cc.DB, cc.ReqCtx(), query, params...)
 	if err != nil {
 		return err
 	}
