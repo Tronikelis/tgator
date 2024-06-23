@@ -11,10 +11,6 @@ import (
 type StructFieldMap map[string]reflect.Value
 
 func initNilPointer(val reflect.Value) {
-	if val.Kind() != reflect.Pointer || !val.IsNil() {
-		return
-	}
-
 	val.Set(reflect.New(val.Type().Elem()))
 }
 
