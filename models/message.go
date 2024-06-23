@@ -9,5 +9,5 @@ type MessageModel struct {
 	Raw      string `db:"raw"`
 	SourceId int32  `db:"source_id"`
 
-	Source SourceModel `embedded:""`
+	Source *SourceModel `embedded:""`
 }

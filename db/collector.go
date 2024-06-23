@@ -16,6 +16,20 @@ func structToMap(v any) (StructFieldMap, error) {
 	val := reflect.ValueOf(v).Elem()
 	typ := reflect.TypeOf(v).Elem()
 
+	if val.Kind() == reflect.Pointer && val.IsNil() {
+		fmt.Printf("val type: %+v\n", val.Type())
+		fmt.Printf("val type new: %+v\n", val.Type().Elem())
+
+		init := reflect.New(val.Type().Elem())
+
+		fmt.Printf("init: %+v\n", init)
+
+		val.Set(init)
+
+		val = val.Elem()
+		typ = typ.Elem()
+	}
+
 	if typ.Kind() != reflect.Struct {
 		return StructFieldMap{}, fmt.Errorf("wanted struct, got %v", typ.Kind().String())
 	}
@@ -89,6 +103,11 @@ func splitDescriptionsByTable(ds []pgconn.FieldDescription) [][]pgconn.FieldDesc
 func nestedStructsPtrs(strct any) []any {
 	val := reflect.ValueOf(strct).Elem()
 	typ := reflect.TypeOf(strct).Elem()
+
+	if val.Kind() == reflect.Pointer {
+		val = val.Elem()
+		typ = typ.Elem()
+	}
 
 	nested := []any{}
 
