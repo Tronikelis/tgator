@@ -6,6 +6,7 @@ import { createSwrKey } from "utils/swr";
 
 type Arg = {
     sourceId: string | number;
+    search?: string;
 };
 
 type Res = PaginationDTO<(MessageDTO & { Source: SourceDTO })[]>;

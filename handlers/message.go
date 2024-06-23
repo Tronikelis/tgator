@@ -86,15 +86,14 @@ func CreateMessage(c echo.Context) error {
 func GetMessages(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
-	bind := binds.PaginationBind{}
+	bind := binds.GetMessagesBind{}
 	if err := c.Bind(&bind); err != nil {
 		return err
 	}
 
-	paginationDto := dtos.PaginationDTO[models.MessageModel]{}
-	paginationDto.SetFromBind(bind)
+	paginationDto := new(dtos.PaginationDTO[models.MessageModel]).SetFromBind(bind.PaginationBind)
 
-	query, params, err := cc.DB.PG.
+	builder := cc.DB.PG.
 		From("messages").
 		Select(
 			goqu.I("messages.*"),
@@ -103,8 +102,13 @@ func GetMessages(c echo.Context) error {
 		LeftJoin(goqu.T("sources"), goqu.On(goqu.I("sources.id").Eq(goqu.I("messages.source_id")))).
 		Limit(uint(paginationDto.Limit)).
 		Offset(uint(paginationDto.Offset)).
-		Order(goqu.I("messages.id").Desc()).
-		ToSQL()
+		Order(goqu.I("messages.id").Desc())
+
+	if bind.Search != "" {
+		builder = builder.Where(goqu.C("raw").Like("%" + bind.Search + "%"))
+	}
+
+	query, params, err := builder.ToSQL()
 
 	if err != nil {
 		return err

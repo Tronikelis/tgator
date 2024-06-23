@@ -92,18 +92,25 @@ func GetSourceMessages(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	paginationDto := dtos.PaginationDTO[models.MessageModel]{}
-	paginationDto.SetFromBind(bind.PaginationBind)
+	paginationDto := new(dtos.PaginationDTO[models.MessageModel]).SetFromBind(bind.PaginationBind)
 
-	query, params, err := cc.DB.PG.
+	builder := cc.DB.PG.
 		From("messages").
 		Where(
 			goqu.C("source_id").Eq(bind.Id),
 		).
 		Limit(uint(paginationDto.Limit)).
 		Offset(uint(paginationDto.Offset)).
-		Order(goqu.C("id").Desc()).
-		ToSQL()
+		Order(goqu.C("id").Desc())
+
+	if bind.Search != "" {
+		builder = builder.Where(goqu.C("raw").Like("%" + bind.Search + "%"))
+	}
+
+	query, params, err := builder.ToSQL()
+	if err != nil {
+		return err
+	}
 
 	messages, err := db.QueryMany[models.MessageModel](cc.DB, cc.ReqCtx(), query, params...)
 	if err != nil {

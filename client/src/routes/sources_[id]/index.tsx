@@ -1,21 +1,23 @@
+import { Card, Group, Input, Loading, Stack, Text } from "solid-daisy";
+import { For, createSignal } from "solid-js";
 import { useParams } from "@solidjs/router";
 
 import useMessages from "hooks/swr/useMessages";
 import useSource from "hooks/swr/useSource";
-import { Card, Stack, Text } from "solid-daisy";
-import { For } from "solid-js";
 
 export default function SourcesId() {
     const params = useParams();
     const sourceId = () => params.id;
 
-    const [{ data: messages }] = useMessages(
+    const [search, setSearch] = createSignal("");
+
+    const [messages] = useMessages(
         () => {
             const id = sourceId();
             if (!id) return;
-            return { sourceId: id };
+            return { sourceId: id, search: search() };
         },
-        { refreshInterval: 5e3 }
+        { refreshInterval: 5e3, keepPreviousData: true }
     );
 
     const [{ data: source }] = useSource(() => {
@@ -34,8 +36,19 @@ export default function SourcesId() {
                 </Stack>
             </Card>
 
+            <Group>
+                <Input
+                    placeholder="Search"
+                    bordered
+                    value={search()}
+                    onInput={e => setSearch(e.target.value)}
+                />
+
+                {messages.isLoading() && <Loading />}
+            </Group>
+
             <Stack class="gap-0">
-                <For each={messages.v?.Data}>
+                <For each={messages.data.v?.Data}>
                     {msg => (
                         <Card class="rounded-none">
                             <Text class="font-mono">{msg.Raw}</Text>
