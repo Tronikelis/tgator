@@ -1,30 +1,30 @@
 package binds
 
 type PaginationBind struct {
-	page  int32 `query:"page"`
-	limit int32 `query:"limit"`
+	Page  int32 `query:"page"`
+	Limit int32 `query:"limit"`
 }
 
-func (p *PaginationBind) Page() int32 {
-	if p.page <= 0 {
-		return p.page
+func (p *PaginationBind) GetPage() int32 {
+	if p.Page <= 0 {
+		return p.Page
 	}
 
-	return p.page
+	return p.Page
 }
 
-func (p *PaginationBind) Limit() int32 {
-	if p.limit <= 0 {
+func (p *PaginationBind) GetLimit() int32 {
+	if p.Limit <= 0 {
 		return 50
 	}
 
-	if p.limit >= 100 {
+	if p.Limit >= 100 {
 		return 100
 	}
 
-	return p.limit
+	return p.Limit
 }
 
-func (p *PaginationBind) Offset() int32 {
-	return p.Page() * p.Limit()
+func (p *PaginationBind) GetOffset() int32 {
+	return p.GetPage() * p.GetLimit()
 }

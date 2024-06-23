@@ -10,7 +10,7 @@ import (
 
 type StructFieldMap map[string]reflect.Value
 
-func structToMapPtrs(v any) (StructFieldMap, error) {
+func structToMap(v any) (StructFieldMap, error) {
 	mp := StructFieldMap{}
 
 	val := reflect.ValueOf(v).Elem()
@@ -31,14 +31,14 @@ func structToMapPtrs(v any) (StructFieldMap, error) {
 			continue
 		}
 
-		mp[name] = fieldVal.Addr()
+		mp[name] = fieldVal
 	}
 
 	return mp, nil
 }
 
 func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) ([]any, error) {
-	structMap, err := structToMapPtrs(strct)
+	structMap, err := structToMap(strct)
 	if err != nil {
 		return []any{}, err
 	}
@@ -54,7 +54,7 @@ func descriptionsToPointers(ds []pgconn.FieldDescription, strct any) ([]any, err
 			continue
 		}
 
-		pointers = append(pointers, value.Interface())
+		pointers = append(pointers, value.Addr().Interface())
 	}
 
 	return pointers, nil
@@ -94,12 +94,13 @@ func nestedStructsPtrs(strct any) []any {
 
 	for i := 0; i < val.NumField(); i++ {
 		fieldTyp := typ.Field(i)
+		fieldVal := val.Field(i)
 
 		if _, exists := fieldTyp.Tag.Lookup("embedded"); !exists {
 			continue
 		}
 
-		nested = append(nested, val.Field(i).Addr().Interface())
+		nested = append(nested, fieldVal.Addr().Interface())
 	}
 
 	return nested
@@ -108,30 +109,12 @@ func nestedStructsPtrs(strct any) []any {
 func RowToStruct[T any](row pgx.CollectableRow) (T, error) {
 	descriptions := splitDescriptionsByTable(row.FieldDescriptions())
 
-	// fmt.Printf("%+v", descriptions)
-
 	var t T
-
-	// first := descriptions[0]
-	//
-	// pointers, err := descriptionsToPointers(first, &t)
-	// if err != nil {
-	// 	return t, err
-	// }
-	//
-	// if err := row.Scan(pointers...); err != nil {
-	// 	return t, err
-	// }
-
 	toBeScanned := []any{}
-
-	fmt.Printf("descriptions: %+v\n\n", descriptions)
 
 	if _, err := traverseDescriptions(&toBeScanned, descriptions, 0, &t); err != nil {
 		return t, err
 	}
-
-	fmt.Printf("toBeScanned: %+v\n\n", toBeScanned)
 
 	if err := row.Scan(toBeScanned...); err != nil {
 		return t, err
@@ -158,7 +141,6 @@ func traverseDescriptions(
 	*toBeScanned = append(*toBeScanned, pointers...)
 
 	for _, nested := range nestedStructsPtrs(strct) {
-		fmt.Printf("nested: %+v\n\n", nested)
 		index, err = traverseDescriptions(toBeScanned, descriptions, index+1, nested)
 		if err != nil {
 			return 0, err

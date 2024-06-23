@@ -99,8 +99,8 @@ func GetMessages(c echo.Context) error {
 			goqu.I("sources.*"),
 		).
 		LeftJoin(goqu.T("sources"), goqu.On(goqu.I("sources.id").Eq(goqu.I("messages.source_id")))).
-		Limit(paginationDto.Limit()).
-		Offset(paginationDto.Offset()).
+		Limit(uint(paginationDto.Limit)).
+		Offset(uint(paginationDto.Offset)).
 		Order(goqu.I("messages.id").Desc()).
 		ToSQL()
 
@@ -113,7 +113,7 @@ func GetMessages(c echo.Context) error {
 		return err
 	}
 
-	paginationDto.SetData(messages)
+	paginationDto.Data = messages
 
 	return c.JSON(http.StatusOK, paginationDto)
 }

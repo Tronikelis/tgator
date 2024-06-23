@@ -95,8 +95,8 @@ func GetSourceMessages(c echo.Context) error {
 		Where(
 			goqu.C("source_id").Eq(bind.Id),
 		).
-		Limit(paginationDto.Limit()).
-		Offset(paginationDto.Offset()).
+		Limit(uint(paginationDto.Limit)).
+		Offset(uint(paginationDto.Offset)).
 		Order(goqu.C("id").Desc()).
 		ToSQL()
 
@@ -105,7 +105,7 @@ func GetSourceMessages(c echo.Context) error {
 		return err
 	}
 
-	paginationDto.SetData(messages)
+	paginationDto.Data = messages
 
 	return c.JSON(http.StatusOK, paginationDto)
 }
