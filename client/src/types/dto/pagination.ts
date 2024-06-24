@@ -1,5 +1,7 @@
 export type PaginationDTO<T extends any[]> = {
+    Page: number;
     Offset: number;
     Limit: number;
-    Data: T | null;
+    Pages: number;
+    Data: T;
 };

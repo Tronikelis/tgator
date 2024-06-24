@@ -5,6 +5,7 @@ import { SwrArg } from "types/swr";
 import { createSwrKey } from "utils/swr";
 
 type Arg = {
+    page?: number;
     sourceId: string | number;
     search?: string;
 };

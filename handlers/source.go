@@ -107,6 +107,13 @@ func GetSourceMessages(c echo.Context) error {
 		builder = builder.Where(goqu.C("raw").Like("%" + bind.Search + "%"))
 	}
 
+	rowCount, err := db.CountRows(cc.DB, cc.ReqCtx(), builder)
+	if err != nil {
+		return err
+	}
+
+	paginationDto.SetPages(rowCount)
+
 	query, params, err := builder.ToSQL()
 	if err != nil {
 		return err
