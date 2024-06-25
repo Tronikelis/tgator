@@ -52,8 +52,6 @@ func CreateMessage(c echo.Context) error {
 		return err
 	}
 
-	defer c.Request().Body.Close()
-
 	bodyStr := string(body)
 
 	if bodyStr == "" {
