@@ -6,6 +6,8 @@ import useMessages from "hooks/swr/useMessages";
 import useSource from "hooks/swr/useSource";
 import usePage from "hooks/usePage";
 
+import HighlightMessage from "./components/HighlightMessage";
+
 export default function SourcesId() {
     const params = useParams();
     const sourceId = () => params.id;
@@ -59,7 +61,11 @@ export default function SourcesId() {
                 <For each={messages.data.v?.Data}>
                     {msg => (
                         <Card class="rounded-none">
-                            <Text class="font-mono">{msg.Raw}</Text>
+                            <HighlightMessage
+                                highlight={search()}
+                                message={msg.Raw}
+                                render={x => <span class="text-red-700">{x}</span>}
+                            />
                         </Card>
                     )}
                 </For>
