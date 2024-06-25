@@ -61,11 +61,13 @@ export default function SourcesId() {
                 <For each={messages.data.v?.Data}>
                     {msg => (
                         <Card class="rounded-none">
-                            <HighlightMessage
-                                highlight={search()}
-                                message={msg.Raw}
-                                render={x => <span class="text-red-700">{x}</span>}
-                            />
+                            <Text class="font-mono">
+                                <HighlightMessage
+                                    highlight={search()}
+                                    message={msg.Raw}
+                                    render={x => <span class="text-red-700">{x}</span>}
+                                />
+                            </Text>
                         </Card>
                     )}
                 </For>
