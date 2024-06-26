@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"io"
 	"net/http"
 	"tgator/binds"
 	"tgator/db"
@@ -41,23 +40,12 @@ func CreateMessage(c echo.Context) error {
 		return err
 	}
 
-	body, err := io.ReadAll(c.Request().Body)
-	if err != nil {
-		return err
-	}
-
-	bodyStr := string(body)
-
-	if bodyStr == "" {
-		return echo.ErrBadRequest
-	}
-
 	query, params, err = cc.DB.PG.
 		Insert("messages").
 		Rows(
 			models.MessageModel{
 				SourceId: source.ID,
-				Raw:      bodyStr,
+				Raw:      bind.Raw,
 			},
 		).
 		Returning("*").
