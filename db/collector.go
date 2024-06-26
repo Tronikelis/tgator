@@ -123,10 +123,15 @@ func nestedStructsPtrs(strct any) []any {
 }
 
 func RowToStruct[T any](row pgx.CollectableRow) (T, error) {
-	descriptions := splitDescriptionsByTable(row.FieldDescriptions())
-
 	var t T
 	toBeScanned := []any{}
+
+	// handle primitive values like string/int
+	if reflect.Indirect(reflect.ValueOf(t)).Kind() != reflect.Struct {
+		return pgx.RowTo[T](row)
+	}
+
+	descriptions := splitDescriptionsByTable(row.FieldDescriptions())
 
 	if _, err := traverseDescriptions(&toBeScanned, descriptions, 0, &t); err != nil {
 		return t, err

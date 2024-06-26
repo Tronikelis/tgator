@@ -5,7 +5,7 @@ type CreateSourceBind struct {
 }
 
 type GetSourceMessagesBind struct {
-	PaginationBind
+	GetMessagesBind
 	Id int32 `param:"id"`
 }
 

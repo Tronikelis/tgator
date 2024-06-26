@@ -12,6 +12,7 @@ import (
 	"tgator/models"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -52,8 +53,6 @@ func CreateMessage(c echo.Context) error {
 		return err
 	}
 
-	defer c.Request().Body.Close()
-
 	bodyStr := string(body)
 
 	if bodyStr == "" {
@@ -86,15 +85,14 @@ func CreateMessage(c echo.Context) error {
 func GetMessages(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
-	bind := binds.PaginationBind{}
+	bind := binds.GetMessagesBind{}
 	if err := c.Bind(&bind); err != nil {
 		return err
 	}
 
-	paginationDto := dtos.PaginationDTO[models.MessageModel]{}
-	paginationDto.SetFromBind(bind)
+	paginationDto := new(dtos.PaginationDTO[models.MessageModel]).SetFromBind(bind.PaginationBind)
 
-	query, params, err := cc.DB.PG.
+	builder := cc.DB.PG.
 		From("messages").
 		Select(
 			goqu.I("messages.*"),
@@ -103,8 +101,28 @@ func GetMessages(c echo.Context) error {
 		LeftJoin(goqu.T("sources"), goqu.On(goqu.I("sources.id").Eq(goqu.I("messages.source_id")))).
 		Limit(uint(paginationDto.Limit)).
 		Offset(uint(paginationDto.Offset)).
-		Order(goqu.I("messages.id").Desc()).
-		ToSQL()
+		Order(goqu.I("messages.id").Desc())
+
+	if bind.Search != "" {
+		builder = builder.Where(goqu.C("raw").Like("%" + bind.Search + "%"))
+	}
+
+	if bind.OrderBy != "" {
+		builder = builder.ClearOrder()
+
+		var order exp.OrderedExpression
+
+		switch bind.OrderBy {
+		case "asc":
+			order = goqu.C("id").Asc()
+		default:
+			order = goqu.C("id").Desc()
+		}
+
+		builder = builder.Order(order)
+	}
+
+	query, params, err := builder.ToSQL()
 
 	if err != nil {
 		return err

@@ -5,7 +5,6 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -29,34 +28,4 @@ func New(url string) (*DB, error) {
 		url:  url,
 		PG:   pg,
 	}, nil
-}
-
-func QueryOne[T any](
-	db *DB,
-	ctx context.Context,
-	query string,
-	params ...interface{},
-) (T, error) {
-	rows, err := db.Pool.Query(ctx, query, params...)
-	var t T
-	if err != nil {
-		return t, err
-	}
-
-	return pgx.CollectOneRow(rows, RowToStruct[T])
-}
-
-func QueryMany[T any](
-	db *DB,
-	ctx context.Context,
-	query string,
-	params ...interface{},
-) ([]T, error) {
-	rows, err := db.Pool.Query(ctx, query, params...)
-	var t []T
-	if err != nil {
-		return t, err
-	}
-
-	return pgx.CollectRows(rows, RowToStruct[T])
 }
