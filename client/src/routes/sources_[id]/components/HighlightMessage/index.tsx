@@ -5,6 +5,7 @@ type Props = {
     highlight: string;
     render?: (message: string) => JSX.Element;
 };
+
 export default function HighlightMessage(props: Props) {
     const hlIndex = () => {
         if (!props.highlight) return -1;

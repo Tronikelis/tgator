@@ -8,6 +8,7 @@ type Arg = {
     page?: number;
     sourceId: string | number;
     search?: string;
+    orderBy?: "asc" | "desc";
 };
 
 type Res = PaginationDTO<(MessageDTO & { Source: SourceDTO })[]>;
