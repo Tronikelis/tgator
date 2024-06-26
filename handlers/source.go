@@ -21,7 +21,7 @@ func CreateSource(c echo.Context) error {
 		return err
 	}
 
-	if bind.Ip == "" {
+	if bind.Name == "" {
 		return echo.ErrBadRequest
 	}
 
@@ -29,7 +29,7 @@ func CreateSource(c echo.Context) error {
 		Insert("sources").
 		Rows(
 			models.SourceModel{
-				Ip: bind.Ip,
+				Name: bind.Name,
 			},
 		).
 		Returning("*").

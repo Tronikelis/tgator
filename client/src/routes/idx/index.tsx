@@ -7,10 +7,10 @@ import { Button, Group, Input, Link, Stack } from "solid-daisy";
 export default function Idx() {
     const [{ data }, { create }] = useSources();
 
-    const [sourceIp, setSourceIp] = createSignal("");
+    const [name, setName] = createSignal("");
 
     const onCreateSource = async () => {
-        await create.trigger({ ip: sourceIp() });
+        await create.trigger({ name: name() });
         create.populateCache();
     };
 
@@ -18,11 +18,12 @@ export default function Idx() {
         <Stack>
             <Group>
                 <Input
+                    placeholder="Name"
                     bordered
-                    value={sourceIp()}
-                    onInput={e => setSourceIp(e.target.value)}
+                    value={name()}
+                    onInput={e => setName(e.target.value)}
                 />
-                <Button onClick={onCreateSource}>create source</Button>
+                <Button onClick={onCreateSource}>Create</Button>
             </Group>
 
             <Group class="gap-8">
@@ -33,7 +34,7 @@ export default function Idx() {
                                 href={urlbat("/sources/:id", { id: source.ID })}
                                 class="font-mono"
                             >
-                                {source.Ip}
+                                {source.Name}
                             </Link>
                         </div>
                     )}

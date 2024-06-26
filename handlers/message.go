@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"strings"
 	"tgator/binds"
 	"tgator/db"
 	"tgator/dtos"
@@ -20,32 +19,26 @@ import (
 func CreateMessage(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
 
-	remoteAddr := c.Request().RemoteAddr
-	remoteAddr = strings.Split(remoteAddr, ":")[0]
+	bind := binds.CreateMessageBind{}
+	if err := cc.Bind(&bind); err != nil {
+		return err
+	}
 
-	query, params, err := cc.DB.PG.From("sources").Where(goqu.C("ip").Eq(remoteAddr)).ToSQL()
+	if bind.Raw == "" || bind.SourceId == 0 {
+		return echo.ErrBadRequest
+	}
+
+	query, params, err := cc.DB.PG.From("sources").Where(goqu.C("id").Eq(bind.SourceId)).ToSQL()
 	if err != nil {
 		return err
 	}
 
 	source, err := db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
 	if errors.Is(err, pgx.ErrNoRows) {
-		query, params, err := cc.DB.PG.
-			Insert("sources").
-			Rows(models.SourceModel{
-				Ip: remoteAddr,
-			}).
-			Returning("*").
-			ToSQL()
-
-		if err != nil {
-			return err
-		}
-
-		source, err = db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
-		if err != nil {
-			return err
-		}
+		return echo.ErrBadRequest
+	}
+	if err != nil {
+		return err
 	}
 
 	body, err := io.ReadAll(c.Request().Body)

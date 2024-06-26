@@ -5,3 +5,8 @@ type GetMessagesBind struct {
 	Search  string `query:"search"`
 	OrderBy string `query:"orderBy"`
 }
+
+type CreateMessageBind struct {
+	SourceId int32  `json:"sourceId"`
+	Raw      string `json:"raw"`
+}

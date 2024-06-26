@@ -64,11 +64,10 @@ export default function SourcesId() {
     return (
         <Stack class="gap-4">
             <Card>
-                <Stack>
-                    <Text bold>Source</Text>
-                    <Text>id: {source.v?.ID}</Text>
-                    <Text>ip: {source.v?.Ip}</Text>
-                </Stack>
+                <Text>
+                    <span class="font-bold">[{source.v?.ID}] </span>
+                    Source: {source.v?.Name}
+                </Text>
             </Card>
 
             <Input

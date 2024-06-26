@@ -1,7 +1,7 @@
 package binds
 
 type CreateSourceBind struct {
-	Ip string `json:"ip"`
+	Name string `json:"name"`
 }
 
 type GetSourceMessagesBind struct {

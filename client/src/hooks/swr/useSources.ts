@@ -14,7 +14,7 @@ export default function useSources() {
 }
 
 type CreateBody = {
-    ip: string;
+    name: string;
 };
 
 function useActions(key: SwrArg<string>) {
