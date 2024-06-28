@@ -64,9 +64,9 @@ export default function SourcesId() {
     return (
         <Stack class="gap-4">
             <Card>
-                <Text>
+                <Text size="xl">
                     <span class="font-bold">[{source.v?.ID}] </span>
-                    Source: {source.v?.Name}
+                    {source.v?.Name}
                 </Text>
             </Card>
 
