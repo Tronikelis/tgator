@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"tgator/db"
 	"tgator/middleware"
@@ -14,7 +15,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	db, err := db.New(os.Getenv("PG_URL"))
