@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"tgator/db"
 	"tgator/middleware"
 	"tgator/routes"
@@ -11,6 +12,11 @@ import (
 	"github.com/labstack/echo/v4"
 	echo_middleware "github.com/labstack/echo/v4/middleware"
 )
+
+func intEnv(key string) (int, error) {
+	value := os.Getenv(key)
+	return strconv.Atoi(value)
+}
 
 func main() {
 	err := godotenv.Load()
@@ -23,6 +29,16 @@ func main() {
 		panic(err)
 	}
 
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "" {
+		appEnv = "dev"
+	}
+
+	port, err := intEnv("PORT")
+	if err != nil {
+		panic(err)
+	}
+
 	e := echo.New()
 
 	e.Use(middleware.GetCustomContextMiddleware(db))
@@ -31,7 +47,16 @@ func main() {
 
 	routes.AddV1(e)
 
-	if err := e.Start("localhost:3000"); err != nil {
+	addr := ""
+	if appEnv == "dev" {
+		addr += "localhost"
+	} else {
+		addr += "0.0.0.0"
+	}
+
+	addr += ":" + fmt.Sprintf("%v", port)
+
+	if err := e.Start(addr); err != nil {
 		panic(err)
 	}
 }
