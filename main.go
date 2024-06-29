@@ -46,6 +46,8 @@ func main() {
 
 	e := echo.New()
 
+	e.Use(echo_middleware.Static("./client/dist/"))
+
 	e.Use(middleware.GetCustomContextMiddleware(db))
 
 	e.Use(echo_middleware.Logger())
