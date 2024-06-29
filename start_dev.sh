@@ -1,7 +1,7 @@
-#/bin/bash
+#!/bin/bash
 
 (
-	cd client
+	cd client || exit
 	pnpm dev &
 )
 
