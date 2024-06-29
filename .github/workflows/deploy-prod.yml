@@ -22,5 +22,5 @@ jobs:
 
       - name: deploy image
         run: |
-          ssh-keyscan -t rsa ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
           docker image save dokku/tgator:${{ github.sha }} | ssh dokku@${{ secrets.SERVER_IP }} git:load-image tgator dokku/tgator:${{ github.sha }}
