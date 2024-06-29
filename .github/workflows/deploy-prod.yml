@@ -19,7 +19,7 @@ jobs:
           touch ~/.ssh/tgator
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/tgator
           chmod 400 ~/.ssh/tgator
-
+      
       - name: build image
         run: docker image build --tag dokku/tgator:${{ github.sha }} .
 
@@ -27,3 +27,6 @@ jobs:
         run: |
           ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
           docker image save dokku/tgator:${{ github.sha }} | ssh dokku@${{ secrets.SERVER_IP }} -i ~/.ssh/tgator git:load-image tgator dokku/tgator:${{ github.sha }}
+
+      - name: ssh cleanup
+        run: rm -rf ~/.ssh
