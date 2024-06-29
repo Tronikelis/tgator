@@ -54,6 +54,10 @@ func main() {
 
 	routes.AddV1(e)
 
+	e.GET("*", func(c echo.Context) error {
+		return c.File("./client/dist/index.html")
+	})
+
 	addr := ""
 	if appEnv == "dev" {
 		addr += "localhost"
