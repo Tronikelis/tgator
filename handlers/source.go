@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 	"tgator/binds"
 	"tgator/db"
 	"tgator/dtos"
@@ -176,14 +177,17 @@ func CreateSourceMessage(c echo.Context) error {
 
 	bodyStr := string(bodyBytes)
 
+	insertRows := []models.MessageModel{}
+	for _, v := range strings.Split(bodyStr, "\n") {
+		insertRows = append(insertRows, models.MessageModel{
+			SourceId: source.ID,
+			Raw:      v,
+		})
+	}
+
 	query, params, err = cc.DB.PG.
 		Insert("messages").
-		Rows(
-			models.MessageModel{
-				SourceId: source.ID,
-				Raw:      bodyStr,
-			},
-		).
+		Rows(insertRows).
 		Returning("*").
 		ToSQL()
 
