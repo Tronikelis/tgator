@@ -13,8 +13,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: deploy ssh key
+      - name: save ssh key
         run: |
+          mkdir -p ~/.ssh/
+          touch ~/.ssh/tgator
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/tgator
 
       - name: build image
