@@ -18,6 +18,7 @@ jobs:
           mkdir -p ~/.ssh/
           touch ~/.ssh/tgator
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/tgator
+          chmod 400 ~/.ssh/tgator
 
       - name: build image
         run: docker image build --tag dokku/tgator:${{ github.sha }} .
