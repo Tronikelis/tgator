@@ -1,0 +1,26 @@
+name: deploy-prod
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: build image
+        run: docker image build --tag dokku/tgator:${{ github.sha }} .
+
+      - name: deploy image
+        run: |
+          ssh-keyscan -t rsa ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          docker image save dokku/tgator:${{ github.sha }} | ssh dokku@${{ secrets.SERVER_IP }} git:load-image tgator dokku/tgator:${{ github.sha }}
