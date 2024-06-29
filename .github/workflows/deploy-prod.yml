@@ -13,9 +13,9 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: deploy ssh key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/tgator
 
       - name: build image
         run: docker image build --tag dokku/tgator:${{ github.sha }} .
@@ -23,4 +23,4 @@ jobs:
       - name: deploy image
         run: |
           ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          docker image save dokku/tgator:${{ github.sha }} | ssh dokku@${{ secrets.SERVER_IP }} git:load-image tgator dokku/tgator:${{ github.sha }}
+          docker image save dokku/tgator:${{ github.sha }} | ssh dokku@${{ secrets.SERVER_IP }} -i ~/.ssh/tgator git:load-image tgator dokku/tgator:${{ github.sha }}
