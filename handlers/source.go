@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 	"tgator/binds"
 	"tgator/db"
@@ -184,6 +185,10 @@ func CreateSourceMessage(c echo.Context) error {
 			Raw:      v,
 		})
 	}
+
+	insertRows = slices.DeleteFunc(insertRows, func(m models.MessageModel) bool {
+		return strings.TrimSpace(m.Raw) == ""
+	})
 
 	query, params, err = cc.DB.PG.
 		Insert("messages").
