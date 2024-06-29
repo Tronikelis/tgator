@@ -21,6 +21,7 @@ func intEnv(key string) (int, error) {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
+		// dont panic on err as .env file does not exist in prod
 		fmt.Println(err)
 	}
 
@@ -36,6 +37,10 @@ func main() {
 
 	port, err := intEnv("PORT")
 	if err != nil {
+		panic(err)
+	}
+
+	if err := db.Migrate(); err != nil {
 		panic(err)
 	}
 

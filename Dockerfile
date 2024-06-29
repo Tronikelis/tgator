@@ -25,6 +25,8 @@ FROM alpine
 
 WORKDIR /app
 
+COPY . .
+
 COPY --from=frontend /app/client/dist client/dist
 COPY --from=backend /app/server-out server-out
 
