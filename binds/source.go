@@ -6,9 +6,13 @@ type CreateSourceBind struct {
 
 type GetSourceMessagesBind struct {
 	GetMessagesBind
-	Id int32 `param:"id"`
+	GetSourceBind
 }
 
 type GetSourceBind struct {
 	Id int32 `param:"id"`
+}
+
+type CreateSourceMessageBind struct {
+	GetSourceBind
 }

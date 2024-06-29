@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"io"
 	"net/http"
 	"tgator/binds"
 	"tgator/db"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -143,4 +146,55 @@ func GetSourceMessages(c echo.Context) error {
 	paginationDto.Data = messages
 
 	return c.JSON(http.StatusOK, paginationDto)
+}
+
+func CreateSourceMessage(c echo.Context) error {
+	cc := c.(*middleware.CustomContext)
+
+	bind := binds.CreateSourceMessageBind{}
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &bind); err != nil {
+		return err
+	}
+
+	query, params, err := cc.DB.PG.From("sources").Where(goqu.C("id").Eq(bind.Id)).ToSQL()
+	if err != nil {
+		return err
+	}
+
+	source, err := db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return echo.ErrBadRequest
+	}
+	if err != nil {
+		return err
+	}
+
+	bodyBytes, err := io.ReadAll(cc.Request().Body)
+	if err != nil {
+		return err
+	}
+
+	bodyStr := string(bodyBytes)
+
+	query, params, err = cc.DB.PG.
+		Insert("messages").
+		Rows(
+			models.MessageModel{
+				SourceId: source.ID,
+				Raw:      bodyStr,
+			},
+		).
+		Returning("*").
+		ToSQL()
+
+	if err != nil {
+		return err
+	}
+
+	message, err := db.QueryOne[models.MessageModel](cc.DB, cc.ReqCtx(), query, params...)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, message)
 }

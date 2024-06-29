@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 	"tgator/binds"
 	"tgator/db"
@@ -11,57 +10,8 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
-
-func CreateMessage(c echo.Context) error {
-	cc := c.(*middleware.CustomContext)
-
-	bind := binds.CreateMessageBind{}
-	if err := cc.Bind(&bind); err != nil {
-		return err
-	}
-
-	if bind.Raw == "" || bind.SourceId == 0 {
-		return echo.ErrBadRequest
-	}
-
-	query, params, err := cc.DB.PG.From("sources").Where(goqu.C("id").Eq(bind.SourceId)).ToSQL()
-	if err != nil {
-		return err
-	}
-
-	source, err := db.QueryOne[models.SourceModel](cc.DB, cc.ReqCtx(), query, params...)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return echo.ErrBadRequest
-	}
-	if err != nil {
-		return err
-	}
-
-	query, params, err = cc.DB.PG.
-		Insert("messages").
-		Rows(
-			models.MessageModel{
-				SourceId: source.ID,
-				Raw:      bind.Raw,
-			},
-		).
-		Returning("*").
-		ToSQL()
-
-	if err != nil {
-		return err
-	}
-
-	message, err := db.QueryOne[models.MessageModel](cc.DB, cc.ReqCtx(), query, params...)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, message)
-}
 
 func GetMessages(c echo.Context) error {
 	cc := c.(*middleware.CustomContext)
