@@ -25,7 +25,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	db, err := db.New(os.Getenv("PG_URL"))
+	db, err := db.New(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
