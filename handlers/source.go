@@ -11,6 +11,7 @@ import (
 	"tgator/dtos"
 	"tgator/middleware"
 	"tgator/models"
+	"tgator/utils"
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
@@ -110,7 +111,14 @@ func GetSourceMessages(c echo.Context) error {
 		Order(goqu.C("id").Desc())
 
 	if bind.Search != "" {
-		builder = builder.Where(goqu.C("raw").Like("%" + bind.Search + "%"))
+		col := goqu.C("raw")
+		target := "%" + bind.Search + "%"
+
+		if utils.HasUppercase(bind.Search) {
+			builder = builder.Where(col.Like(target))
+		} else {
+			builder = builder.Where(col.ILike(target))
+		}
 	}
 
 	if bind.OrderBy != "" {
