@@ -3,5 +3,6 @@ export type PaginationDTO<T extends any[]> = {
     Offset: number;
     Limit: number;
     Pages: number;
+    Count: number;
     Data: T;
 };

@@ -1,4 +1,14 @@
-import { Button, Card, Group, Input, Loading, Pagination, Stack, Text } from "solid-daisy";
+import {
+    Button,
+    Card,
+    Divider,
+    Group,
+    Input,
+    Loading,
+    Pagination,
+    Stack,
+    Text,
+} from "solid-daisy";
 import { For, createSignal } from "solid-js";
 import { useParams } from "@solidjs/router";
 
@@ -79,35 +89,50 @@ export default function SourcesId() {
                 rightSection={messages.isLoading() && <Loading />}
             />
 
-            <Group>
-                <Button onClick={onClickOrderBy}>{orderBy().toUpperCase()}</Button>
+            <Group class="pb-4">
+                <Text size="lg" bold>
+                    {messages.data.v?.Count}
+                </Text>
+
+                <Button class="ml-auto" size="sm" onClick={onClickOrderBy}>
+                    {orderBy().toUpperCase()}
+                </Button>
 
                 <Pagination
+                    size="sm"
                     value={page()}
                     setValue={setPage}
                     total={messages.data.v?.Pages || 0}
                 />
             </Group>
 
-            <Stack class="gap-0">
+            <Stack>
                 <For each={messages.data.v?.Data}>
                     {msg => (
-                        <Card class="rounded-none">
-                            <Group>
-                                <Text class="flex-1 font-mono">
-                                    <pre>
-                                        <HighlightMessage
-                                            highlight={search()}
-                                            message={safeJsonPretty(msg.Raw)}
-                                            render={x => (
-                                                <span class="font-bold text-red-600">{x}</span>
-                                            )}
-                                        />
-                                    </pre>
+                        <Card>
+                            <Stack class="gap-1">
+                                <Text class="text-right" dimmed italic>
+                                    {formatDate(msg.CreatedAt)}
                                 </Text>
 
-                                <Text italic>{formatDate(msg.CreatedAt)}</Text>
-                            </Group>
+                                <Divider />
+
+                                <Stack class="overflow-x-auto">
+                                    <Text class="flex-1 font-mono">
+                                        <pre>
+                                            <HighlightMessage
+                                                highlight={search()}
+                                                message={safeJsonPretty(msg.Raw)}
+                                                render={x => (
+                                                    <span class="font-bold text-red-600">
+                                                        {x}
+                                                    </span>
+                                                )}
+                                            />
+                                        </pre>
+                                    </Text>
+                                </Stack>
+                            </Stack>
                         </Card>
                     )}
                 </For>
