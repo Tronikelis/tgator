@@ -1,7 +1,13 @@
-import { Accessor, createEffect, createSignal, on } from "solid-js";
+import { Accessor, createEffect, on } from "solid-js";
+
+import useUrlSignal from "./useUrlSignal";
 
 export default function usePage(deps: Accessor<any>[] = []) {
-    const [value, setValue] = createSignal(0);
+    const [value, setValue] = useUrlSignal<number>({
+        key: "page",
+        def: 0,
+        fromQuery: q => parseInt(q),
+    });
 
     createEffect(
         on(deps, () => {

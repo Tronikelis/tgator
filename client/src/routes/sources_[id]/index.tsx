@@ -1,15 +1,17 @@
+import urlbat from "urlbat";
 import {
     Button,
     Card,
     Divider,
     Group,
     Input,
+    Link,
     Loading,
     Pagination,
     Stack,
     Text,
 } from "solid-daisy";
-import { For, createSignal } from "solid-js";
+import { For } from "solid-js";
 import { useParams } from "@solidjs/router";
 
 import useMessages from "hooks/swr/useMessages";
@@ -17,16 +19,29 @@ import useSource from "hooks/swr/useSource";
 import usePage from "hooks/usePage";
 import safeJsonPretty from "utils/safeJsonPretty";
 import useDebouncedValue from "hooks/useDebouncedValue";
+import useUrlSignal from "hooks/useUrlSignal";
 
 import HighlightMessage from "./components/HighlightMessage";
+
+type OrderBy = "desc" | "asc";
 
 export default function SourcesId() {
     const params = useParams();
     const sourceId = () => params.id;
 
-    const [search, setSearch] = createSignal("");
+    const [search, setSearch] = useUrlSignal<string>({
+        key: "search",
+        fromQuery: x => x,
+        def: "",
+    });
+
+    const [orderBy, setOrderBy] = useUrlSignal<OrderBy>({
+        key: "orderBy",
+        fromQuery: x => x as OrderBy,
+        def: "desc",
+    });
+
     const [page, setPage] = usePage([search]);
-    const [orderBy, setOrderBy] = createSignal<"desc" | "asc">("desc");
 
     const debouncedSearch = useDebouncedValue(search, () => 200);
 
@@ -76,7 +91,15 @@ export default function SourcesId() {
             <Card>
                 <Text size="xl">
                     <span class="font-bold">[{source.v?.ID}] </span>
-                    {source.v?.Name}
+                    <Link
+                        href={
+                            source.v?.ID
+                                ? urlbat("/sources/:id", { id: source.v.ID })
+                                : undefined
+                        }
+                    >
+                        {source.v?.Name}
+                    </Link>
                 </Text>
             </Card>
 
@@ -89,7 +112,7 @@ export default function SourcesId() {
                 rightSection={messages.isLoading() && <Loading />}
             />
 
-            <Group class="pb-4">
+            <Group class="pb-4 flex-wrap">
                 <Text size="lg" bold>
                     {messages.data.v?.Count}
                 </Text>

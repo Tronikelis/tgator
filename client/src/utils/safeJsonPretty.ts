@@ -1,6 +1,8 @@
 export default function safeJsonPretty(str: string) {
     try {
-        return JSON.stringify(JSON.parse(str), null, 2);
+        str = JSON.stringify(JSON.parse(str), null, 2);
+        str = str.replaceAll("\\n", "\n");
+        return str;
     } catch {
         return str;
     }
