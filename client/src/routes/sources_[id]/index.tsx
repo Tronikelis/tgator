@@ -144,7 +144,7 @@ export default function SourcesId() {
                                     <Text class="flex-1 font-mono">
                                         <pre>
                                             <HighlightMessage
-                                                highlight={debouncedSearch()}
+                                                highlight={search()}
                                                 message={safeJsonPretty(msg.Raw)}
                                                 render={x => (
                                                     <span class="font-bold text-red-600">
