@@ -112,6 +112,11 @@ func GetSourceMessages(c echo.Context) error {
 
 	if bind.Search != "" {
 		col := goqu.C("raw")
+
+		// for now escape postgres search patterns
+		bind.Search = strings.ReplaceAll(bind.Search, "_", "\\_")
+		bind.Search = strings.ReplaceAll(bind.Search, "%", "\\%")
+
 		target := "%" + bind.Search + "%"
 
 		if utils.HasUppercase(bind.Search) {
