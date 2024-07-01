@@ -7,14 +7,13 @@ import (
 	"slices"
 	"strings"
 	"tgator/binds"
+	"tgator/builders"
 	"tgator/db"
 	"tgator/dtos"
 	"tgator/middleware"
 	"tgator/models"
-	"tgator/utils"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -101,47 +100,17 @@ func GetSourceMessages(c echo.Context) error {
 
 	paginationDto := new(dtos.PaginationDTO[models.MessageModel]).SetFromBind(bind.PaginationBind)
 
-	builder := cc.DB.PG.
-		From("messages").
-		Where(
-			goqu.C("source_id").Eq(bind.Id),
-		).
-		Limit(uint(paginationDto.Limit)).
-		Offset(uint(paginationDto.Offset)).
-		Order(goqu.C("id").Desc())
+	builder := builders.NewGetSourceMessagesBuilder(cc.DB.PG, *paginationDto, bind.Id)
 
 	if bind.Search != "" {
-		col := goqu.C("raw")
-
-		// for now escape postgres search patterns
-		bind.Search = strings.ReplaceAll(bind.Search, "_", "\\_")
-		bind.Search = strings.ReplaceAll(bind.Search, "%", "\\%")
-
-		target := "%" + bind.Search + "%"
-
-		if utils.HasUppercase(bind.Search) {
-			builder = builder.Where(col.Like(target))
-		} else {
-			builder = builder.Where(col.ILike(target))
-		}
+		builder.WhereSearch(bind.Search)
 	}
 
 	if bind.OrderBy != "" {
-		builder = builder.ClearOrder()
-
-		var order exp.OrderedExpression
-
-		switch bind.OrderBy {
-		case "asc":
-			order = goqu.C("id").Asc()
-		default:
-			order = goqu.C("id").Desc()
-		}
-
-		builder = builder.Order(order)
+		builder.OrderBy(bind.OrderBy)
 	}
 
-	rowCount, err := db.CountRows(cc.DB, cc.ReqCtx(), builder)
+	rowCount, err := db.CountRows(cc.DB, cc.ReqCtx(), builder.UnwrapSelectDataset())
 	if err != nil {
 		return err
 	}
