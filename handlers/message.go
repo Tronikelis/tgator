@@ -24,6 +24,8 @@ func GetMessages(c echo.Context) error {
 
 	builder := builders.NewGetMessagesBuilder(cc.DB.PG, *paginationDto)
 
+	builder.JoinSources()
+
 	if bind.Search != "" {
 		builder.WhereSearch(bind.Search)
 	}
