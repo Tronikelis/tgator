@@ -1,5 +1,7 @@
 import { For, JSX, createMemo } from "solid-js";
 
+import useDebouncedValue from "hooks/useDebouncedValue";
+
 type Props = {
     message: string;
     highlight: string;
@@ -7,32 +9,34 @@ type Props = {
 };
 
 export default function HighlightMessage(props: Props) {
-    const elements = createMemo<JSX.Element[]>(() => {
-        const message = props.message.toLowerCase();
-        const highlight = props.highlight.toLowerCase();
+    const message = () => props.message;
 
-        if (!message || !highlight) return [props.message];
+    const _highlight = () => props.highlight;
+    const highlight = useDebouncedValue(_highlight);
+
+    const elements = createMemo<JSX.Element[]>(() => {
+        const m = message();
+        const h = highlight();
+
+        if (!m || !h) return [m];
 
         // so first position is 0
-        let index = -highlight.length;
+        let index = -h.length;
         let lastIndexEnd = 0;
 
         const final: JSX.Element[] = [];
 
-        while ((index = message.indexOf(highlight, index + highlight.length)) !== -1) {
+        while ((index = m.indexOf(h, index + h.length)) !== -1) {
             // add message in between last index and current index
-            const msg = props.message.slice(lastIndexEnd, index);
+            const msg = m.slice(lastIndexEnd, index);
 
             // add current index highlight
-            const highlighted = props.message.slice(
-                index,
-                (lastIndexEnd = index + props.highlight.length)
-            );
+            const highlighted = m.slice(index, (lastIndexEnd = index + h.length));
 
             final.push(msg, props.render?.(highlighted));
         }
 
-        final.push(props.message.slice(lastIndexEnd));
+        final.push(m.slice(lastIndexEnd));
 
         return final;
     });

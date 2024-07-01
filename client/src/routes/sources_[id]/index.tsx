@@ -86,6 +86,8 @@ export default function SourcesId() {
         setOrderBy(n);
     };
 
+    const renderHighlight = (x: string) => <span class="font-bold text-red-600">{x}</span>;
+
     return (
         <Stack class="gap-4">
             <Card>
@@ -146,11 +148,7 @@ export default function SourcesId() {
                                             <HighlightMessage
                                                 highlight={search()}
                                                 message={safeJsonPretty(msg.Raw)}
-                                                render={x => (
-                                                    <span class="font-bold text-red-600">
-                                                        {x}
-                                                    </span>
-                                                )}
+                                                render={renderHighlight}
                                             />
                                         </pre>
                                     </Text>
