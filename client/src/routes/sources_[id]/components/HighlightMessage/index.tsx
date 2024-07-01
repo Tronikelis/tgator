@@ -15,10 +15,12 @@ export default function HighlightMessage(props: Props) {
     const highlight = useDebouncedValue(_highlight);
 
     const elements = createMemo<JSX.Element[]>(() => {
-        const m = message();
-        const h = highlight();
+        const m = message().toLowerCase();
+        const h = highlight().toLowerCase();
 
-        if (!m || !h) return [m];
+        const mOrig = message();
+
+        if (!m || !h) return [mOrig];
 
         // so first position is 0
         let index = -h.length;
@@ -28,15 +30,15 @@ export default function HighlightMessage(props: Props) {
 
         while ((index = m.indexOf(h, index + h.length)) !== -1) {
             // add message in between last index and current index
-            const msg = m.slice(lastIndexEnd, index);
+            const msg = mOrig.slice(lastIndexEnd, index);
 
             // add current index highlight
-            const highlighted = m.slice(index, (lastIndexEnd = index + h.length));
+            const highlighted = mOrig.slice(index, (lastIndexEnd = index + h.length));
 
             final.push(msg, props.render?.(highlighted));
         }
 
-        final.push(m.slice(lastIndexEnd));
+        final.push(mOrig.slice(lastIndexEnd));
 
         return final;
     });
