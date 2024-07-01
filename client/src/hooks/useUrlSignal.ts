@@ -1,5 +1,5 @@
 import { useBeforeLeave, useSearchParams } from "@solidjs/router";
-import { createEffect, createSignal, on, onMount } from "solid-js";
+import { createEffect, createSignal, on, onCleanup, onMount } from "solid-js";
 
 type Arg<T> = {
     key: string;
@@ -19,9 +19,16 @@ export default function useUrlSignal<T extends string | number | boolean>({
 
     const [value, setValue] = createSignal<T>(def);
 
-    onMount(() => {
+    const setValueToParam = () => {
         const param = getParam();
         if (param) setValue(() => fromQuery(param));
+    };
+
+    setValueToParam();
+
+    onMount(() => {
+        addEventListener("popstate", setValueToParam);
+        onCleanup(() => removeEventListener("popstate", setValueToParam));
     });
 
     useBeforeLeave(ev => {
