@@ -55,6 +55,7 @@ func main() {
 	routes.AddV1(e)
 
 	e.GET("*", func(c echo.Context) error {
+		c.Response().Header().Set("Cache-Control", "no-cache")
 		return c.File("./client/dist/index.html")
 	})
 
