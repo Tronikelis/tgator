@@ -20,6 +20,7 @@ import usePage from "hooks/usePage";
 import safeJsonPretty from "utils/safeJsonPretty";
 import useDebouncedValue from "hooks/useDebouncedValue";
 import useUrlSignal from "hooks/useUrlSignal";
+import readableNumber from "utils/readableNumber";
 
 import HighlightMessage from "./components/HighlightMessage";
 
@@ -116,7 +117,7 @@ export default function SourcesId() {
 
             <Group class="pb-4 flex-wrap">
                 <Text size="lg" bold>
-                    {messages.data.v?.Count}
+                    {readableNumber(messages.data.v?.Count || 0)}
                 </Text>
 
                 <Button class="ml-auto" size="sm" onClick={onClickOrderBy}>
