@@ -12,7 +12,11 @@ import "./main.css";
 
 function App() {
     return (
-        <SWROptionsProvider value={{ fetcher: key => api.get(key).then(x => x.data) }}>
+        <SWROptionsProvider
+            value={{
+                fetcher: (key, { signal }) => api.get(key, { signal }).then(x => x.data),
+            }}
+        >
             <Root>
                 <Router>
                     <Route path="/" component={Idx} />
