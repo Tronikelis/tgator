@@ -93,6 +93,10 @@ export default function SourcesId() {
         <Stack class="gap-4">
             <Card>
                 <Text size="xl">
+                    <Link color="primary" bold href="/">
+                        H
+                    </Link>
+                    {" • "}
                     <span class="font-bold">[{source.v?.ID}] </span>
                     <Link
                         href={

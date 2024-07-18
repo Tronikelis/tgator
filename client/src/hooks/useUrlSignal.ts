@@ -1,5 +1,6 @@
 import { useBeforeLeave, useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, on, onCleanup, onMount } from "solid-js";
+import debounce from "utils/debounce";
 
 type Arg<T> = {
     key: string;
@@ -46,7 +47,13 @@ export default function useUrlSignal<T extends string | number | boolean>({
         }
     });
 
-    createEffect(on(value, value => setParam(String(value)), { defer: true }));
+    createEffect(
+        on(
+            value,
+            debounce(value => setParam(String(value)), 1e3),
+            { defer: true }
+        )
+    );
 
     return [value, setValue] as const;
 }
