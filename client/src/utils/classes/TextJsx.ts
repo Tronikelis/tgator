@@ -21,8 +21,11 @@ export default class ChunkNodeTree<E = undefined> {
 
     private splitNode(node: ChunkNode<E>, coords: Coords): [ChunkNode<E>, ...ChunkNode<E>[]] {
         if (this.fitsBeneath(node.coords, coords)) {
-            // return [inside, left, right]
-            throw new Error("todo");
+            const inside = this.createNode(node.extra, ...coords);
+            const left = this.createNode(node.extra, node.coords[0], coords[0]);
+            const right = this.createNode(node.extra, coords[1], node.coords[1]);
+
+            return [inside, left, right];
         }
 
         let from: number;
