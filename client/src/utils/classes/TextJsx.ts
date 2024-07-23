@@ -19,7 +19,12 @@ export default class ChunkNodeTree<E = undefined> {
         };
     }
 
-    private splitNode(node: ChunkNode<E>, coords: Coords): [ChunkNode<E>, ChunkNode<E>] {
+    private splitNode(node: ChunkNode<E>, coords: Coords): [ChunkNode<E>, ...ChunkNode<E>[]] {
+        if (this.fitsBeneath(node.coords, coords)) {
+            // return [inside, left, right]
+            throw new Error("todo");
+        }
+
         let from: number;
         let to: number;
 
@@ -75,10 +80,10 @@ export default class ChunkNodeTree<E = undefined> {
             return;
         }
 
-        const [inside, other] = this.splitNode(node, curr.coords);
-        this.addChild(curr, inside);
+        const [inside, ...others] = this.splitNode(node, curr.coords);
 
-        this.insertNode(other);
+        this.addChild(curr, inside);
+        others.forEach(other => this.insertNode(other));
     }
 
     addNode(extra: E, from: number, to: number): void {
