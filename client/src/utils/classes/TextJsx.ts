@@ -83,6 +83,12 @@ export default class ChunkNodeTree<E = undefined> {
             return;
         }
 
+        // reverse fitsBeneath do reverse operation
+        // make node.children = curr
+        if (this.fitsBeneath(node.coords, curr.coords)) {
+            // todo
+        }
+
         const [inside, ...others] = this.splitNode(node, curr.coords);
 
         this.addChild(curr, inside);
