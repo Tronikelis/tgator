@@ -42,6 +42,11 @@ export default class ChunkNodeTree<E = undefined> {
         return [nodeA, nodeB];
     }
 
+    private addChild(to: ChunkNode<E>, child: ChunkNode<E>): void {
+        to.children.push(child);
+        to.children.sort((a, b) => a.coords[0] - b.coords[0]);
+    }
+
     private fitsBeneath(parent: Coords, child: Coords): boolean {
         return parent[0] <= child[0] && parent[1] >= child[1];
     }
@@ -66,12 +71,12 @@ export default class ChunkNodeTree<E = undefined> {
         }
 
         if (curr === this.root || this.fitsBeneath(curr.coords, node.coords)) {
-            curr.children.push(node);
+            this.addChild(curr, node);
             return;
         }
 
         const [inside, other] = this.splitNode(node, curr.coords);
-        curr.children.push(inside);
+        this.addChild(curr, inside);
 
         this.insertNode(other);
     }
