@@ -59,7 +59,8 @@ export default class ChunkNodeTree<E = undefined> {
 
             if (this.isIntersecting(parent.coords, node.coords)) {
                 curr = parent;
-                i = 0;
+                // next continue will make this 0
+                i = -1;
                 continue;
             }
         }
