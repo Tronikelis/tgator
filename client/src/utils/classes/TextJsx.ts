@@ -22,32 +22,35 @@ export default class ChunkNodeTree<E = undefined> {
     private splitNode(node: ChunkNode<E>, coords: Coords): [ChunkNode<E>, ...ChunkNode<E>[]] {
         if (this.fitsBeneath(node.coords, coords)) {
             const inside = this.createNode(node.extra, ...coords);
-            const left = this.createNode(node.extra, node.coords[0], coords[0]);
-            const right = this.createNode(node.extra, coords[1], node.coords[1]);
 
-            return [inside, left, right];
+            const result: [ChunkNode<E>, ...ChunkNode<E>[]] = [inside];
+
+            if (node.coords[0] !== coords[0]) {
+                const left = this.createNode(node.extra, node.coords[0], coords[0]);
+                result.push(left);
+            }
+
+            if (node.coords[1] !== coords[1]) {
+                const right = this.createNode(node.extra, coords[1], node.coords[1]);
+                result.push(right);
+            }
+
+            return result;
         }
 
-        let from: number;
-        let to: number;
-
-        let nodeB: ChunkNode<E>;
-
-        if (node.coords[0] > coords[0]) {
-            from = node.coords[0];
-            to = coords[1];
-
-            nodeB = this.createNode(node.extra, coords[1], node.coords[1]);
-        } else {
-            from = node.coords[1];
-            to = coords[0];
-
-            nodeB = this.createNode(node.extra, node.coords[0], coords[0]);
+        // node: [1, 10]
+        // coords: [0, 7]
+        if (node.coords[1] > coords[0]) {
+            const inside = this.createNode(node.extra, coords[0], node.coords[1]);
+            const other = this.createNode(node.extra, node.coords[0], coords[0]);
+            return [inside, other];
         }
 
-        const nodeA = this.createNode(node.extra, from, to);
-
-        return [nodeA, nodeB];
+        // node: [4, 6]
+        // coords [0, 5]
+        const inside = this.createNode(node.extra, node.coords[0], coords[1]);
+        const other = this.createNode(node.extra, coords[1], node.coords[1]);
+        return [inside, other];
     }
 
     private addChild(to: ChunkNode<E>, child: ChunkNode<E>): void {
@@ -84,6 +87,8 @@ export default class ChunkNodeTree<E = undefined> {
         }
 
         const [inside, ...others] = this.splitNode(node, curr.coords);
+
+        console.log({ inside, others }, { node, curr });
 
         this.addChild(curr, inside);
         others.forEach(other => this.insertNode(other));
