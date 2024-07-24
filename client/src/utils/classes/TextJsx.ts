@@ -22,7 +22,6 @@ export default class ChunkNodeTree<E = undefined> {
     private splitNode(node: ChunkNode<E>, coords: Coords): [ChunkNode<E>, ...ChunkNode<E>[]] {
         if (this.fitsBeneath(node.coords, coords)) {
             const inside = this.createNode(node.extra, ...coords);
-
             const result: [ChunkNode<E>, ...ChunkNode<E>[]] = [inside];
 
             if (node.coords[0] !== coords[0]) {
@@ -38,18 +37,16 @@ export default class ChunkNodeTree<E = undefined> {
             return result;
         }
 
-        // node: [1, 10]
-        // coords: [0, 7]
-        if (node.coords[1] > coords[0]) {
-            const inside = this.createNode(node.extra, coords[0], node.coords[1]);
-            const other = this.createNode(node.extra, node.coords[0], coords[0]);
+        // node is shifted right
+        if (coords[0] < node.coords[0]) {
+            const inside = this.createNode(node.extra, node.coords[0], coords[1]);
+            const other = this.createNode(node.extra, coords[1], node.coords[1]);
             return [inside, other];
         }
 
-        // node: [4, 6]
-        // coords [0, 5]
-        const inside = this.createNode(node.extra, node.coords[0], coords[1]);
-        const other = this.createNode(node.extra, coords[1], node.coords[1]);
+        // node is shifted left
+        const inside = this.createNode(node.extra, coords[0], node.coords[1]);
+        const other = this.createNode(node.extra, node.coords[0], coords[0]);
         return [inside, other];
     }
 
