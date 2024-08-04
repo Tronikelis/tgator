@@ -1,9 +1,10 @@
-import { useParams } from "@solidjs/router";
+import urlbat from "urlbat";
 import { Link } from "solid-daisy";
 import { createMemo } from "solid-js";
-import urlbat from "urlbat";
-import { ChunkNodeRenderer } from "utils/classes/TextJsx";
+import { useParams } from "@solidjs/router";
+
 import safeJsonPretty from "utils/safeJsonPretty";
+import { ChunkNodeRenderer } from "utils/classes/ChunkNode";
 
 type Props = {
     message: string;
