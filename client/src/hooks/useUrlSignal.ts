@@ -28,6 +28,10 @@ export default function useUrlSignal<T extends string | number | boolean>({
 
     setValueToParam();
 
+    createEffect(() => {
+        setValueToParam();
+    });
+
     useBeforeLeave(ev => {
         if (typeof ev.to !== "string") return;
 
