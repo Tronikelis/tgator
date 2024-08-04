@@ -44,7 +44,7 @@ export default function Message(props: Props) {
                     (x, raw) => (
                         <Link
                             href={urlbat("/sources/:id", { id: params.id, search: raw })}
-                            class="underline"
+                            hover
                         >
                             {x}
                         </Link>
