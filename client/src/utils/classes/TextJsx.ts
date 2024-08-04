@@ -110,11 +110,9 @@ export class ChunkNodeRenderer extends ChunkNodeTree<RenderFn> {
         this.text = text;
     }
 
-    private renderLeaf(node: ChunkNode<RenderFn>, arg?: JSX.Element): JSX.Element {
+    private renderLeaf(node: ChunkNode<RenderFn>): JSX.Element {
         const raw = this.text.slice(node.coords[0], node.coords[1]);
-        arg = arg || raw;
-
-        return node.extra(arg, raw);
+        return node.extra(raw, raw);
     }
 
     private renderNode(arg: ChunkNode<RenderFn>): JSX.Element {
