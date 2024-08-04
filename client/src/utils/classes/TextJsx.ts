@@ -1,3 +1,5 @@
+import { JSX } from "solid-js";
+
 type Coords = [from: number, to: number];
 
 type ChunkNode<E> = {
@@ -85,8 +87,6 @@ export default class ChunkNodeTree<E = undefined> {
 
         const [inside, ...others] = this.splitNode(node, curr.coords);
 
-        console.log({ inside, others }, { node, curr });
-
         this.addChild(curr, inside);
         others.forEach(other => this.insertNode(other));
     }
@@ -97,5 +97,59 @@ export default class ChunkNodeTree<E = undefined> {
 
     constructor(extra: E, from: number, to: number) {
         this.root = this.createNode(extra, from, to);
+    }
+}
+
+type RenderFn = (arg: JSX.Element, raw: string) => JSX.Element;
+
+export class ChunkNodeRenderer extends ChunkNodeTree<RenderFn> {
+    private text: string;
+
+    constructor(text: string) {
+        super(x => x, 0, text.length);
+        this.text = text;
+    }
+
+    private renderLeaf(node: ChunkNode<RenderFn>, arg?: JSX.Element): JSX.Element {
+        const raw = this.text.slice(node.coords[0], node.coords[1]);
+        arg = arg || raw;
+
+        return node.extra(arg, raw);
+    }
+
+    private renderNode(arg: ChunkNode<RenderFn>): JSX.Element {
+        if (arg.children.length === 0) {
+            return this.renderLeaf(arg);
+        }
+
+        const elems: JSX.ArrayElement = [];
+
+        if (arg.children[0]!.coords[0] !== arg.coords[0]) {
+            elems.push(this.text.slice(arg.coords[0], arg.children[0]!.coords[0]));
+        }
+
+        let prevEnd = -1;
+        for (const child of arg.children) {
+            // there was a "hole" between previous child
+            if (prevEnd !== -1 && prevEnd !== child.coords[0]) {
+                elems.push(this.text.slice(prevEnd, child.coords[0]));
+            }
+            prevEnd = child.coords[1];
+
+            elems.push(this.renderNode(child));
+        }
+
+        if (prevEnd !== arg.coords[1]) {
+            elems.push(this.text.slice(prevEnd, arg.coords[1]));
+        }
+
+        console.log({ elems });
+
+        return arg.extra(elems, this.text.slice(...arg.coords));
+    }
+
+    render(): JSX.Element {
+        console.log({ root: this.root });
+        return this.renderNode(this.root);
     }
 }

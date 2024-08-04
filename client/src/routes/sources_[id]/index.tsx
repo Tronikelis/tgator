@@ -23,6 +23,7 @@ import useUrlSignal from "hooks/useUrlSignal";
 import readableNumber from "utils/readableNumber";
 
 import HighlightMessage from "./components/HighlightMessage";
+import Message from "./Message";
 
 type OrderBy = "desc" | "asc";
 
@@ -87,8 +88,6 @@ export default function SourcesId() {
         setOrderBy(n);
     };
 
-    const renderHighlight = (x: string) => <span class="font-bold text-red-600">{x}</span>;
-
     return (
         <Stack class="gap-4">
             <Card>
@@ -149,13 +148,7 @@ export default function SourcesId() {
 
                                 <Stack class="overflow-x-auto">
                                     <Text class="flex-1 font-mono">
-                                        <pre>
-                                            <HighlightMessage
-                                                highlight={search()}
-                                                message={safeJsonPretty(msg.Raw)}
-                                                render={renderHighlight}
-                                            />
-                                        </pre>
+                                        <Message highlight={search()} message={msg.Raw} />
                                     </Text>
                                 </Stack>
                             </Stack>
