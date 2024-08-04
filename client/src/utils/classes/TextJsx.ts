@@ -143,13 +143,10 @@ export class ChunkNodeRenderer extends ChunkNodeTree<RenderFn> {
             elems.push(this.text.slice(prevEnd, arg.coords[1]));
         }
 
-        console.log({ elems });
-
         return arg.extra(elems, this.text.slice(...arg.coords));
     }
 
     render(): JSX.Element {
-        console.log({ root: this.root });
         return this.renderNode(this.root);
     }
 }
