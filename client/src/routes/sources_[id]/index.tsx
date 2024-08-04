@@ -17,12 +17,10 @@ import { useParams } from "@solidjs/router";
 import useMessages from "hooks/swr/useMessages";
 import useSource from "hooks/swr/useSource";
 import usePage from "hooks/usePage";
-import safeJsonPretty from "utils/safeJsonPretty";
 import useDebouncedValue from "hooks/useDebouncedValue";
 import useUrlSignal from "hooks/useUrlSignal";
 import readableNumber from "utils/readableNumber";
 
-import HighlightMessage from "./components/HighlightMessage";
 import Message from "./Message";
 
 type OrderBy = "desc" | "asc";
