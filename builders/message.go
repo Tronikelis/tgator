@@ -71,12 +71,12 @@ func (b *GetMessagesBuilder) WhereSearch(search string) *GetMessagesBuilder {
 	search = strings.ReplaceAll(search, "_", "\\_")
 	search = strings.ReplaceAll(search, "%", "\\%")
 
-	target := "%" + search + "%"
-
 	not := search[0] == '!'
 	if not {
 		search = search[1:]
 	}
+
+	target := "%" + search + "%"
 
 	expressions := []exp.Expression{}
 
