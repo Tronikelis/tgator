@@ -81,9 +81,9 @@ func (b *GetMessagesBuilder) WhereSearch(search string) *GetMessagesBuilder {
 	expressions := []exp.Expression{}
 
 	if not {
-		expressions = append(expressions, col.NotILike(target))
+		expressions = append(expressions, col.NotLike(target))
 	} else {
-		expressions = append(expressions, col.ILike(target))
+		expressions = append(expressions, col.Like(target))
 	}
 
 	where := goqu.Or(expressions...)
