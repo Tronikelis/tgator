@@ -12,7 +12,7 @@ WORKDIR /app/client
 RUN pnpm i --frozen-lockfile
 RUN pnpm build
 
-FROM golang:1.22-alpine as backend
+FROM golang:1.23-alpine as backend
 
 WORKDIR /app
 

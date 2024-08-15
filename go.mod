@@ -1,6 +1,6 @@
 module tgator
 
-go 1.22.4
+go 1.23.0
 
 require (
 	github.com/doug-martin/goqu/v9 v9.19.0
@@ -21,6 +21,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/atomic v1.11.0 // indirect

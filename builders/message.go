@@ -4,7 +4,6 @@ import (
 	"strings"
 	"tgator/db"
 	"tgator/dtos"
-	"tgator/utils"
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
@@ -73,19 +72,23 @@ func (b *GetMessagesBuilder) WhereSearch(search string) *GetMessagesBuilder {
 	search = strings.ReplaceAll(search, "%", "\\%")
 
 	target := "%" + search + "%"
-	targetNoSpaces := "%" + strings.ReplaceAll(search, " ", "") + "%"
 
-	if utils.HasUppercase(search) {
-		b.builder = b.builder.Where(goqu.Or(
-			col.Like(target),
-			col.Like(targetNoSpaces),
-		))
-	} else {
-		b.builder = b.builder.Where(goqu.Or(
-			col.ILike(target),
-			col.ILike(targetNoSpaces),
-		))
+	not := search[0] == '!'
+	if not {
+		search = search[1:]
 	}
+
+	expressions := []exp.Expression{}
+
+	if not {
+		expressions = append(expressions, col.NotILike(target))
+	} else {
+		expressions = append(expressions, col.ILike(target))
+	}
+
+	where := goqu.Or(expressions...)
+
+	b.builder = b.builder.Where(where)
 
 	return b
 }
